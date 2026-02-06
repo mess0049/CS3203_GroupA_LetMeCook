@@ -27,3 +27,17 @@ If you need to contact the developers for any reason, please reach out to one of
 - william.messer.1@ou.edu
 - Dladd@ou.edu
 - peter.d.pham-1@ou.edu
+
+## Roadmap
+- Calorie Tracker
+- Recipe API
+- Recipe Search
+- Pantry Tracker
+- AI Helper
+- User Preference Tracker
+- User Login/Register
+- User Profile
+- UI Design
+
+## Contributing
+Currently not accepting contributions.
