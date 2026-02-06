@@ -1,2 +1,3 @@
-# CS3203_GroupA_LetMeCook
-repository for LetMeCook product for Software Engineering Group A
+# LetMeCook
+meal prep app that tracks calory goals and recomends recipes to help you reach those goals
+## Description
