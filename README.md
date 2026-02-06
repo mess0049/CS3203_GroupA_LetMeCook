@@ -13,3 +13,17 @@ To be implemented later
 
 ## Installation
 Will determine if necessary later
+
+## Usage
+- Track calories and eating habits
+- Search for numerous recipes using a variety of filters
+- Keep track of ingredients in your pantry
+- Favorite recipes for future consumption
+- Ask AI for recipe recommendations
+
+## Support
+If you need to contact the developers for any reason, please reach out to one of these emails:
+- benny.tru@ou.edu
+- william.messer.1@ou.edu
+- Dladd@ou.edu
+- peter.d.pham-1@ou.edu
