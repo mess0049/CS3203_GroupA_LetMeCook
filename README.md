@@ -41,3 +41,18 @@ If you need to contact the developers for any reason, please reach out to one of
 
 ## Contributing
 Currently not accepting contributions.
+
+## Authors and acknowledgment
+- Will Messer
+- Caius Thomas
+- Peter Pham
+- Benny Truett
+- Janathan Tip
+- David Ladd
+- Seonghyun Park
+
+## License
+To be implemented later
+
+## Project Status
+Currently in active development with many features planned for upcoming releases.
