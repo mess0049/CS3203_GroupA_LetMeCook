@@ -14,6 +14,12 @@ To be implemented later
 ## Installation
 Will determine if necessary later
 
+## Developer Requirements
+- Coded in JavaScript through VSCode 
+- Download Node.js V24.13.1 (includes npm)
+- Connect Outlook account to Microsoft Azure (If access is necessary, email Support)
+  
+
 ## Usage
 - Track calories and eating habits
 - Search for numerous recipes using a variety of filters
