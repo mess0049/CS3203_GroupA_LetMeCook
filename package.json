@@ -1,5 +1,13 @@
 {
-  "devDependencies": {
-    "webpack-cli": "^6.0.1"
-  }
+  "name": "letmecook",
+  "version": "1.0.0",
+  "description": "CS3203 project",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "build": "echo \"No build step\""
+  },
+  "author": "Group A",
+  "license": "ISC",
+  "dependencies": {}
 }

@@ -4,7 +4,7 @@
 const calorieTracker = {
   totalCalories: 0,
   entries: [],
-//test commit
+
   // Add a food entry
   addEntry: function (name, calories) {
     this.entries.push({ name, calories });
