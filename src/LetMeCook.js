@@ -1,5 +1,5 @@
 //LetMeCook test file
-//
+// test commit for azure static
 // A simple calorie tracker object
 const calorieTracker = {
   totalCalories: 0,
