@@ -12,7 +12,7 @@ To be implemented later
 To be implemented later
 
 ## Installation
-Will determine if necessary later
+No software yet, but you can access it at https://icy-cliff-071828e1e.1.azurestaticapps.net!
 
 ## Developer Requirements
 - Coded in JavaScript through VSCode 
