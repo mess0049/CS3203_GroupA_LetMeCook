@@ -11,21 +11,27 @@
 ## High Priority
 
 - [Feature] Calorie Tracker - Caius Thomas, Janathan Tip - 2/16/26
+  
   (An interface for logging daily nutritional intake and monitoring calorie counts. The user is able to logic specific calorie meal counts and view a daily total to compare with certain limits.)
   
     - [Subfeature] Meal Recommendations Based on Calorie Goals - Janathan Tip - 3/23/26
+      
       (A reasoning engine that suggests specific food items to hit remaining daily targets. The user can receive automated meal prompts based on their calorie goals.)
       
 - [Feature] Recipe API - Benny Truett, Caius Thomas, David Ladd, Janathan Tip, Peter Pham, Seongyun Park, Will Messer - 3/2/26
+  
   (Backend integration layer connecting the application to external data sources for recipes. The user is able to see external recipes within the app.)
   
 - [Structure] Database Setup - Benny Truett, Caius Thomas, David Ladd, Janathan Tip, Peter Pham, Seongyun Park, Will Messer - 3/9/26
+  
   (The foundational architecture for storing profiles, pantry items, and logs. The user is able to save and retrieve their data without loss.)
   
 - [Feature] AI Helper - Janathan Tip, Peter Pham - 3/16/26
+  
   (An AI for facilitating recipe searches and a chat interface for answering general cooking or nutrition questions. User is able to receive help regarding recipe searches or advice.)
   
     - ?[Subfeature] Translations - Janathan Tip - 4/13/26
+      
       (Multi-language support for the AI interface and recipe text. User can toggle between different languages to view content.)
 
 ## Normal Priority
