@@ -12,17 +12,15 @@
 
 - [Feature] Calorie Tracker - Caius Thomas, Janathan Tip - 2/16/26
 
-    - [Subfeature] Recommend meals based on calorie goals - Janathan Tip - 3/23/26
+    - [Subfeature] Meal Recommendations Based on Calorie Goals - Janathan Tip - 3/23/26
 
-- [Feature] Recipe API - Benny Truett, Caius Thomas, David Ladd, Janathan Tip, Peter Pham Seongyun Park, Will Messer - 3/2/26
+- [Feature] Recipe API - Benny Truett, Caius Thomas, David Ladd, Janathan Tip, Peter Pham, Seongyun Park, Will Messer - 3/2/26
 
-- [Structure] Database Setup - Benny Truett, Caius Thomas, David Ladd, Janathan Tip, Peter Pham Seongyun Park, Will Messer - 3/9/26
+- [Structure] Database Setup - Benny Truett, Caius Thomas, David Ladd, Janathan Tip, Peter Pham, Seongyun Park, Will Messer - 3/9/26
 
 - [Feature] AI Helper - Janathan Tip, Peter Pham - 3/16/26
 
     - ?[Subfeature] Translations - Janathan Tip - 4/13/26
-
-
 
 ## Normal Priority
 
@@ -65,3 +63,21 @@
 ## Final Product Deadline!!
 
 May 4th, 2026!!!!
+
+## Tasks Per Person
+
+- Everyone: Recipe API, Database Setup
+
+- Benny Truett: User Login/Register, User Profile, Flavor Text Randomized Greeting, UI Design
+
+- Caius Thomas: Calorie Tracker, Recipe Search, AI Suggestions, Favorites
+
+- David Ladd: Recipe Search, Meal History, User Preference Tracker, Dietary Restrictions, Cuisines, Recipe Difficulty
+
+- Janathan Tip: Calorie Tracker, Meal Recommendations Based on Calorie Goals, AI Helper, Translations
+
+- Peter Pham: AI Helper, Pantry Tracker, Pantry Recipe Recommendations
+
+- Seonghyun Park: Pantry Tracker, Weight Goals
+
+- Will Messer: User Preference Tracker, Dietary Restrictions, Recipe Cost, Recipe Time Requirement, UI Design
