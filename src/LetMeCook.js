@@ -1,42 +1,57 @@
-//LetMeCook test file
-// test commit for azure static (3)
-// A simple calorie tracker object
+// Basic calorie tracker object
 const calorieTracker = {
   totalCalories: 0,
   entries: [],
 
-  // Add a food entry
-  addEntry: function (name, calories) {
+  addEntry(name, calories) {
     this.entries.push({ name, calories });
     this.totalCalories += calories;
-    console.log(`${name} added: +${calories} calories`);
+    updateSummary();
   },
 
-  // Remove an entry by name
-  removeEntry: function (name) {
+  removeEntry(name) {
     const index = this.entries.findIndex(e => e.name === name);
     if (index !== -1) {
       this.totalCalories -= this.entries[index].calories;
-      console.log(`${name} removed: -${this.entries[index].calories} calories`);
       this.entries.splice(index, 1);
+      updateSummary();
     } else {
-      console.log(`No entry found for "${name}"`);
+      alert(`No entry found for "${name}"`);
     }
-  },
-
-  // Show summary
-  showSummary: function () {
-    console.log("---- Daily Summary ----");
-    this.entries.forEach(e => {
-      console.log(`${e.name}: ${e.calories} calories`);
-    });
-    console.log(`Total: ${this.totalCalories} calories`);
   }
 };
 
-// Example usage:
-calorieTracker.addEntry("Apple", 95);
-calorieTracker.addEntry("Chicken Sandwich", 420);
-calorieTracker.removeEntry("Apple");
-calorieTracker.showSummary();
+// UI FUNCTIONS
+function addSelectedFood() {
+  const select = document.getElementById("foodSelect");
+  const name = select.value;
+  const calories = parseInt(select.selectedOptions[0].dataset.cal);
 
+  calorieTracker.addEntry(name, calories);
+}
+
+function removeFood() {
+  const name = document.getElementById("removeName").value.trim();
+  if (!name) return alert("Enter a food name to remove");
+
+  calorieTracker.removeEntry(name);
+  document.getElementById("removeName").value = "";
+}
+
+function updateSummary() {
+  const summaryDiv = document.getElementById("summary");
+
+  if (calorieTracker.entries.length === 0) {
+    summaryDiv.innerHTML = "No entries yet.";
+    return;
+  }
+
+  let html = "<ul>";
+  calorieTracker.entries.forEach(e => {
+    html += `<li>${e.name}: ${e.calories} calories</li>`;
+  });
+  html += "</ul>";
+  html += `<strong>Total: ${calorieTracker.totalCalories} calories</strong>`;
+
+  summaryDiv.innerHTML = html;
+}

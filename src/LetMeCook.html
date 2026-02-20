@@ -1,15 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>My Project</title>
-    <!-- 1. Link CSS inside the <head> -->
-    <link rel="stylesheet" href="LetMeCook.css">
+  <title>Calorie Tracker</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    select, button { margin: 5px; padding: 5px; }
+    #summary { margin-top: 20px; }
+  </style>
 </head>
 <body>
-    <h1>Hello World</h1>
 
-    <!-- 2. Link JS just before the closing </body> tag -->
-    <script src="LetMeCook.js"></script>
+  <h1>Calorie Tracker</h1>
+
+  <!-- Dropdown for food selection -->
+  <label for="foodSelect">Choose food:</label>
+  <select id="foodSelect">
+    <option value="Apple" data-cal="95">Apple (95 cal)</option>
+    <option value="Banana" data-cal="105">Banana (105 cal)</option>
+    <option value="Chicken Sandwich" data-cal="420">Chicken Sandwich (420 cal)</option>
+    <option value="Yogurt" data-cal="150">Yogurt (150 cal)</option>
+  </select>
+
+  <button onclick="addSelectedFood()">Add</button>
+
+  <br>
+
+  <!-- Remove food input -->
+  <input id="removeName" type="text" placeholder="Food name to remove">
+  <button onclick="removeFood()">Remove</button>
+
+  <h2>Summary</h2>
+  <div id="summary">No entries yet.</div>
+
+  <script src="LetMeCook.js"></script>
 </body>
 </html>
