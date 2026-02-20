@@ -104,6 +104,8 @@
 
 - [Structure] UI Design - Benny Truett, Will Messer - 4/27/26
 
+  (The visual styling, layout, and polish of the application. User experiences a consistent and easy-to-navigate interface across all screens and pages.)
+
 ## Final Product Deadline!!
 
 May 4th, 2026!!!!
