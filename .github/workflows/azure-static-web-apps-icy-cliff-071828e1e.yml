@@ -3,7 +3,8 @@ name: Azure Static Web Apps CI/CD
 on:
   push:
     branches:
-      - main
+      - main #production
+      - add-recipe-api #recipe features preview
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
@@ -56,4 +57,5 @@ jobs:
         uses: Azure/static-web-apps-deploy@v1
         with:
           action: "close"
+
 
