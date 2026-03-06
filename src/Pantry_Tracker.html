@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pantry Tracker</title>
+  <style>
+    body { font-family: Arial; padding: 20px; line-height: 1.6; }
+    select, button { margin: 5px; padding: 8px 12px; cursor: pointer; }
+    #summary { margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+    <header>
+        <h1>"User" Pantry</h1>
+        <p>check ingredients and get recipes</p>
+    </header>
+
+    <main>
+        <section id="user_ingredient">
+            <h3>your refrigeator</h3>
+            <table id="pantryTable">
+                <thead>
+                    <tr>
+                        <th>ingredient</th>
+                        <th>number</th>
+                    </tr>
+                </thead>
+                <tbody id="pantryBody">
+                    </tbody>
+            </table>
+            <!--data in database-->
+        </section>
+
+        <section id="recipe-recommendation">
+            <h3>recommended-recipe</h3>
+            <button onclick="recommend()">recipe-recommended</button>
+            <ul id="Choosed_Recipes">
+                <li>choose your recipe</li>
+            </ul>
+        </section>
+    </main>
+
+    <script src="Pantry_Tracker.js"></script>
+
+  
+</body>
+</html>
