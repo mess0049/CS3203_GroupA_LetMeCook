@@ -18,13 +18,13 @@ const ingredients_in_refrigeator = [
 function displayPantry() {
     const pantryBody = document.getElementById("pantryBody");
     pantryBody.innerHTML = ""; //Reset
+    let i=0;
 
     useringredient.forEach(function(pantry)
         {
-        const row = '<tr>' + 
-                '<td>' + pantry.name + '</td>' + 
-                '<td>' + pantry.quantity + '</td>' + 
-              '</tr>';
+        i++;
+        const row = 
+        '<tr>' + '<td>' + i +'. '+ pantry.name + ' ' + pantry.quantity + '</td>' + '</tr>';
         pantryBody.innerHTML += row;
         }
     );
