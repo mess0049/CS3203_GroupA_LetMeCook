@@ -1,3 +1,5 @@
+const SPOONACULAR_API_KEY = "8b2aa49a6a01471cb5679c65a28cc848";
+
 //dummy database need to change to database
 let useringredient = [
     { name: "Egg", quantity: 5},
@@ -5,14 +7,6 @@ let useringredient = [
     { name: "Tomato", quantity: 3},
     { name: "Bread", quantity: 2}
 ];
-
-const ingredients_in_refrigerator = [
-    { name: "Fried Egg", ingredients: ["Egg"] },
-    { name: "Tomato Omelette", ingredients: ["Egg", "Tomato"] },
-    { name: "French Toast", ingredients: ["Egg", "Milk", "Bread"] },
-    { name: "Milkshake", ingredients: ["Milk", "Ice Cream"] }
-];
-//dummy database need to change to database
  
 //show refrigerator_ingredients when load page
 function displayPantry() {
@@ -115,17 +109,31 @@ function promptEdit(name, currentQuantity) {
 }
 
 
-function recipe_check() { // Still need to change to database and implement recipe API
-    // Get names of what the user has in the pantry
-    const user_ingredient_names = useringredient.map(item => item.name);
+async function recipe_check() { // Still need to change to database and implement recipe API
+    const ingredientList = useringredient.map(item => item.name).join(",");
 
-    // Filter recipes where every required ingredient is in the pantry
-    const available = ingredients_in_refrigerator.filter(function(recipe) {
-        return recipe.ingredients.every(function(needed) {
-            return user_ingredient_names.includes(needed);
-        });
+    const url = `https://api.spoonacular.com/recipes/findByIngredients` +
+                `?ingredients=${encodeURIComponent(ingredientList)}` +
+                `&number=5` +
+                `&ranking=2` +
+                `&apiKey=${SPOONACULAR_API_KEY}`;
+    
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error(`API responded with status ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    return data.map(function(recipe) {
+        return {
+            name: recipe.title,
+            usedIngredients: recipe.usedIngredients.map(i => i.name),
+            missedIngredients: recipe.missedIngredients.map(i => i.name),
+            image: recipe.image
+        };
     });
-    return available;
 }
 
 //when press recommend button
