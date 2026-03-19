@@ -69,7 +69,7 @@ function removeIngredient(name) {
         item => item.name.toLowerCase() === name.toLowerCase()
     );
     if (index === -1) {
-        alert('"${name}" was not found in your pantry.')
+        alert(`"${name}" was not found in your pantry.`)
         return;
     }
 
@@ -79,7 +79,7 @@ function removeIngredient(name) {
 
 function promptEdit(name, currentQuantity) {
     const input = prompt(
-        'Edit quantity for "${name}" (current: ${currentQuantity}).\nEnter 0 to remove it entirely:',
+        `Edit quantity for "${name}" (current: ${currentQuantity}).\nEnter 0 to remove it entirely:`,
         currentQuantity
     );
 
@@ -93,7 +93,7 @@ function promptEdit(name, currentQuantity) {
     }
 
     if (newQuantity === 0) {
-        const confirmed = confirm('Remove "${name}" from your pantry entirely?');
+        const confirmed = confirm(`Remove "${name}" from your pantry entirely?`);
         if (confirmed) removeIngredient(name);
         return;
     }
