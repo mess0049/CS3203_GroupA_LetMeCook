@@ -37,6 +37,19 @@ function displayPantry() {
     });
 }
 
+function removeIngredient(name) {
+    const index = useringredient.findIndex(
+        item => item.name.toLowerCase() === name.toLowerCase()
+    );
+    if (index === -1) {
+        alert('"${name}" was not found in your pantry.')
+        return;
+    }
+
+    useringredient.splice(index , 1);
+    displayPantry();
+}
+
 
 function recipe_check() { // Still need to change to database and implement recipe API
     // Get names of what the user has in the pantry
