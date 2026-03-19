@@ -1,5 +1,5 @@
 //dummy database need to change to database
-const useringredient = [
+let useringredient = [
     { name: "Egg", quantity: 5},
     { name: "Milk", quantity: 1},
     { name: "Tomato", quantity: 3},
@@ -35,6 +35,39 @@ function displayPantry() {
             </tr>`;
         pantryBody.innerHTML += row;
     });
+}
+
+function addIngredient() {
+    const nameInput = document.getElementById("addName");
+    const quantityInput = document.getElementById("addQuantity");
+
+    const name = nameInput.value.trim();
+    const quantity = parseInt(quantityInput.value);
+
+    if (!name) {
+        alert("Please enter an ingredient name.");
+        return;
+    }
+    if (isNaN(quantity) || quantity <= 0) {
+        alert("Quantity must be a positive number.");
+        return;
+    }
+
+    // If the ingredient already exists, merge quantity instead of duplicating
+    const existing = useringredient.find(
+        item => item.name.toLowerCase() === name.toLowerCase()
+    );
+
+    if (existing) {
+        existing.quantity += quantity;
+        alert(`"${existing.name}" already in pantry. Updated quantity to ${existing.quantity}.`);
+    } else {
+        useringredient.push({ name: name, quantity: quantity });
+    }
+
+    nameInput.value = "";
+    quantityInput.value = "";
+    displayPantry();
 }
 
 function removeIngredient(name) {

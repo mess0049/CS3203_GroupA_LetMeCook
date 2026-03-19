@@ -19,6 +19,11 @@
     <main>
         <section id="user_ingredient">
             <h2>Your Refrigerator</h2>
+            <div id ="add-ingredient-form">
+                <input id="addName" type="text" placeholder="Ingredient name" />
+                <input id="addQuantity" type="number" placeholder="Quantity" min="1" />
+                <button onclick="addIngredient()">Add Ingredient</button>
+            </div>
             <table id="pantryTable">
                 <tbody id="pantryBody">
                 </tbody>
