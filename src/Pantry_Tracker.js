@@ -137,31 +137,43 @@ async function recipe_check() { // Still need to change to database and implemen
 }
 
 //when press recommend button
-function recommend() {
+async function recommend() {
     const recipeListElement = document.getElementById("Choosed_Recipes");
-    recipeListElement.innerHTML = ""; //reset
 
-    //ingredient name
-    const user_ingredient_names = [];
-    for (let i = 0; i < useringredient.length; i++) {
-        user_ingredient_names.push(useringredient[i].name);
+    if (useringredient.length === 0) {
+        recipeListElement.innerHTML = "<li>Your pantry is empty. Add some ingredients first!</li>";
+        return;
     }
 
-    
-    //find recipe(check to exist all ingredient of recipe)
-    const final_recipes = recipe_check();
+    recipeListElement.innerHTML = "<li>Loading recipes...</li>";
 
+    try {
+        const final_recipes = await recipe_check();
+        recipeListElement.innerHTML = "";
 
-    //show in window
-    if (final_recipes.length > 0) {
-        for (let i = 0; i < final_recipes.length; i++) {
-            let recipe = final_recipes[i];
-            let li = document.createElement("li");
-            li.textContent = recipe.name + " (Ingredients: " + recipe.ingredients.join(", ") + ")";
-            recipeListElement.appendChild(li);
+        if (final_recipes.length === 0) {
+            recipeListElement.innerHTML = "<li>No recipes found with your current ingredients.</li>";
+            return;
         }
-    } else {
-        recipeListElement.innerHTML = "<li>No recipes found. Try adding more ingredients!</li>";
+
+        final_recipes.forEach(function(recipe) {
+            const li = document.createElement("li");
+
+            let text = recipe.name;
+            text += " - Uses: " + recipe.usedIngredients.join(", ");
+
+            if (recipe.missedIngredients.length > 0) {
+                text += " | Still need: " + recipe.missedIngredients.join(", ");
+            } else {
+                text += " ✓ (you have everything!)";
+            }
+
+            li.textContent = text;
+            recipeListElement.appendChild(li);
+        });
+    } catch (error) {
+        recipeListElement.innerHTML = "<li>Could not fetch recipes. Please try again later.</li>";
+        console.error("Spoonacular API error:", error);
     }
 }
 
