@@ -50,6 +50,37 @@ function removeIngredient(name) {
     displayPantry();
 }
 
+function promptEdit(name, currentQuantity) {
+    const input = prompt(
+        'Edit quantity for "${name}" (current: ${currentQuantity}).\nEnter 0 to remove it entirely:',
+        currentQuantity
+    );
+
+    if (input === null) return; // User hits Cancel
+
+    const newQuantity = parseInt(input);
+
+    if (isNaN(newQuantity) || newQuantity < 0) {
+        alert("Please enter a valid quantity (0 or more).");
+        return;
+    }
+
+    if (newQuantity === 0) {
+        const confirmed = confirm('Remove "${name}" from your pantry entirely?');
+        if (confirmed) removeIngredient(name);
+        return;
+    }
+
+    const item = useringredient.find(
+        i => i.name.toLowerCase() === name.toLowerCase()
+    );
+
+    if (item) {
+        item.quantity = newQuantity;
+        displayPantry();
+    }
+}
+
 
 function recipe_check() { // Still need to change to database and implement recipe API
     // Get names of what the user has in the pantry
