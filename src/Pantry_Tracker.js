@@ -6,7 +6,7 @@ const useringredient = [
     { name: "Bread", quantity: 2}
 ];
 
-const ingredients_in_refrigeator = [
+const ingredients_in_refrigerator = [
     { name: "Fried Egg", ingredients: ["Egg"] },
     { name: "Tomato Omelette", ingredients: ["Egg", "Tomato"] },
     { name: "French Toast", ingredients: ["Egg", "Milk", "Bread"] },
@@ -14,7 +14,7 @@ const ingredients_in_refrigeator = [
 ];
 //dummy database need to change to database
  
-//show refrigeator_ingredients when load page
+//show refrigerator_ingredients when load page
 function displayPantry() {
     const pantryBody = document.getElementById("pantryBody");
     pantryBody.innerHTML = ""; //Reset
@@ -31,8 +31,17 @@ function displayPantry() {
 }
 
 
-function recipe_check() {
-//fill this
+function recipe_check() { // Still need to change to database and implement recipe API
+    // Get names of what the user has in the pantry
+    const user_ingredient_names = useringredient.map(item => item.name);
+
+    // Filter recipes where every required ingredient is in the pantry
+    const available = ingredients_in_refrigerator.filter(function(recipe) {
+        return recipe.ingredients.every(function(needed) {
+            return user_ingredient_names.includes(needed);
+        });
+    });
+    return available;
 }
 
 //when press recommend button
@@ -53,8 +62,8 @@ function recommend() {
 
     //show in window
     if (final_recipes.length > 0) {
-        for (let i = 0; i < availableRecipes.length; i++) {
-            let recipe = availableRecipes[i];
+        for (let i = 0; i < final_recipes.length; i++) {
+            let recipe = final_recipes[i];
             let li = document.createElement("li");
             li.textContent = recipe.name + " (Ingredients: " + recipe.ingredients.join(", ") + ")";
             recipeListElement.appendChild(li);
