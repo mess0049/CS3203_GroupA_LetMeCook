@@ -18,16 +18,23 @@ const ingredients_in_refrigerator = [
 function displayPantry() {
     const pantryBody = document.getElementById("pantryBody");
     pantryBody.innerHTML = ""; //Reset
-    let i=0;
 
-    useringredient.forEach(function(pantry)
-        {
-        i++;
-        const row = 
-        '<tr>' + '<td>' + i +'. '+ pantry.name + ' ' + pantry.quantity + '</td>' + '</tr>';
+    if (useringredient.length === 0) {
+        pantryBody.innerHTML = "<tr><td>Your pantry is empty. Add some ingredients!</td></tr>";
+        return;
+    }
+
+    useringredient.forEach(function(item, index){
+        const row = `
+            <tr>
+                <td>${index + 1}. ${item.name} — Qty: ${item.quantity}</td>
+                <td>
+                    <button onclick="promptEdit('${item.name}', ${item.quantity})">Edit</button>
+                    <button onclick="removeIngredient('${item.name}')">Remove</button>
+                </td>
+            </tr>`;
         pantryBody.innerHTML += row;
-        }
-    );
+    });
 }
 
 
