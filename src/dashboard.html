@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LetMeCook</title>
+</head>
+<body>
+  <h2>Dashboard</h2>
+  <p id="userEmail"></p>
+  <button id="logoutBtn">Logout</button>
+
+  <h1>LetMeCook</h1>
+  <button onclick="location.href='Pantry_Tracker.html'">Open Your Refrigerator</button>
+  <button onclick="location.href='LetMeCook.html'">Calorie Tracker</button>
+
+
+  <script type="module">
+    import { logout, observeAuth } from "./auth.js";
+
+    const emailDisplay = document.getElementById("userEmail");
+
+    observeAuth((user) => {
+      if (user) {
+        emailDisplay.textContent = user.email;
+      } else {
+        window.location.href = "login.html";
+      }
+    });
+
+    document.getElementById("logoutBtn").onclick = logout;
+  </script>
+</body>
+</html>

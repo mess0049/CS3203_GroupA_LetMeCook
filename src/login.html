@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login</title>
+    </head>
+<body>
+  <h2>Login</h2>
+
+  <input id="email" type="email">
+  <input id="password" type="password">
+  <button id="loginBtn">Login</button>
+  <button onclick="location.href='index.html'">Return</button>
+
+  <script type="module">
+    import { login } from "./auth.js";
+
+    document.getElementById("loginBtn").onclick = async () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        await login(email, password);
+        window.location.href = "dashboard.html";
+      } catch (err) {
+        alert(err.message);
+      }
+    };
+  </script>
+</body>
+</html>
