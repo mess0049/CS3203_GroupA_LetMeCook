@@ -2,14 +2,34 @@
   "name": "letmecook",
   "version": "1.0.0",
   "description": "CS3203 project",
-  "main": "index.js",
+  "main": "index.html",
+  "type": "module",
   "scripts": {
     "start": "node index.js",
-    "build": "echo \"No build step\""
+    "build": "echo \"No build step\"",
+    "test": "jest --runInBand"
   },
+  "jest": {
+  "testEnvironment": "jsdom",
+  "transform": {
+    "^.+\\.js$": "babel-jest"
+  },
+  "globals": {
+    "babel-jest": {
+      "useESM": true
+    }
+  }
+},
   "author": "Group A",
   "license": "ISC",
   "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.2",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "babel-jest": "^30.3.0",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0",
     "webpack": "^5.105.2",
     "webpack-cli": "^6.0.1"
   },
