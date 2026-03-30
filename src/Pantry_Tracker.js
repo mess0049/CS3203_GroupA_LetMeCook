@@ -1,12 +1,43 @@
 const SPOONACULAR_API_KEY = "8b2aa49a6a01471cb5679c65a28cc848";
 
 //dummy database need to change to database
-let useringredient = [
+/*let useringredient = [
     { name: "Egg", quantity: 5},
     { name: "Milk", quantity: 1},
     { name: "Tomato", quantity: 3},
     { name: "Bread", quantity: 2}
 ];
+*/
+
+import { db } from "./firebase.js";
+import { doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+let useringredient = []; // still local copy
+let currentUserUID = null;
+
+import { observeAuth } from "./auth.js";
+
+observeAuth(async (uid) => {
+  if (!uid) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  currentUserUID = uid;
+
+  // Load pantry from Firestore
+  const pantryRef = doc(db, "pantries", uid);
+  const pantrySnap = await getDoc(pantryRef);
+
+  if (pantrySnap.exists()) {
+    useringredient = pantrySnap.data().items || [];
+  } else {
+    useringredient = [];
+    await setDoc(pantryRef, { items: [] }); // create empty pantry for new users
+  }
+
+  displayPantry();
+});
  
 //show refrigerator_ingredients when load page
 function displayPantry() {
@@ -31,7 +62,13 @@ function displayPantry() {
     });
 }
 
-function addIngredient() {
+async function savePantry() {
+  if (!currentUserUID) return;
+  const pantryRef = doc(db, "pantries", currentUserUID);
+  await setDoc(pantryRef, { items: useringredient });
+}
+
+async function addIngredient() {
     const nameInput = document.getElementById("addName");
     const quantityInput = document.getElementById("addQuantity");
 
@@ -62,9 +99,10 @@ function addIngredient() {
     nameInput.value = "";
     quantityInput.value = "";
     displayPantry();
+    await savePantry();
 }
 
-function removeIngredient(name) {
+async function removeIngredient(name) {
     const index = useringredient.findIndex(
         item => item.name.toLowerCase() === name.toLowerCase()
     );
@@ -75,9 +113,10 @@ function removeIngredient(name) {
 
     useringredient.splice(index , 1);
     displayPantry();
+    await savePantry();
 }
 
-function promptEdit(name, currentQuantity) {
+async function promptEdit(name, currentQuantity) {
     const input = prompt(
         `Edit quantity for "${name}" (current: ${currentQuantity}).\nEnter 0 to remove it entirely:`,
         currentQuantity
@@ -106,6 +145,7 @@ function promptEdit(name, currentQuantity) {
         item.quantity = newQuantity;
         displayPantry();
     }
+
 }
 
 
@@ -177,5 +217,9 @@ async function recommend() {
     }
 }
 
+window.addIngredient = addIngredient;
+window.removeIngredient = removeIngredient;
+window.promptEdit = promptEdit;
+window.recommend = recommend;
 
 displayPantry();

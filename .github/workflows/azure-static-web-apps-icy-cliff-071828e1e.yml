@@ -5,9 +5,6 @@ on:
     branches:
       - main #production
       - add-recipe-api #recipe features preview
-      - user-profile #user profile feature preview
-      - recipe-search # recipe search feature preview
-      - pantry-tracker # pantry tracker feature preview
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
@@ -60,8 +57,5 @@ jobs:
         uses: Azure/static-web-apps-deploy@v1
         with:
           action: "close"
-
-
-
 
 
