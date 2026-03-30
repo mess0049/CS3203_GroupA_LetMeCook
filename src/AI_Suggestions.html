@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Food Suggestions</title>
+  <style>
+    /* Add your own styles to match your site */
+    .ai-form { max-width: 500px; margin: 2rem auto; font-family: sans-serif; }
+    .ai-form label { display: block; margin-top: 1rem; font-weight: 600; }
+    .ai-form input, .ai-form textarea { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 6px; }
+    .ai-form button { margin-top: 1.5rem; padding: 10px 24px; background: #2e8b57; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .ai-form button:disabled { opacity: 0.6; cursor: not-allowed; }
+    #suggestions { max-width: 500px; margin: 2rem auto; white-space: pre-wrap; line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+<div class="ai-form">
+  <h2>🍽️ AI Food Suggestions</h2>
+  <label>Daily Calorie Goal *
+    <input type="number" id="calorieGoal" placeholder="e.g. 2000">
+  </label>
+  <label>Calories Eaten Today
+    <input type="number" id="currentCalories" placeholder="e.g. 800">
+  </label>
+  <label>Allergies
+    <input type="text" id="allergies" placeholder="e.g. peanuts, dairy">
+  </label>
+  <label>Dietary Needs
+    <textarea id="dietaryNeeds" rows="2" placeholder="e.g. high protein, vegan"></textarea>
+  </label>
+  <button id="submitBtn" onclick="getSuggestions()">Get AI Suggestions</button> <button onclick="location.href='LetMeCook.html'">Return</button>
+</div>
+
+<div id="suggestions"></div>
+
+<script>
+ 
+  const API_URL = "https://tiqkdnpjiytfquzbbybr.supabase.co/functions/v1/ai-food-suggestions";
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpcWtkbnBqaXl0ZnF1emJieWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MDA2NTUsImV4cCI6MjA5MDQ3NjY1NX0.EErkriXnyvVdbio7sgdprOFYkvs9iq4-pRPH30wUACU";
+  
+    async function getSuggestions() {
+    const btn = document.getElementById("submitBtn");
+    const output = document.getElementById("suggestions");
+    const calorieGoal = document.getElementById("calorieGoal").value;
+
+    if (!calorieGoal) { alert("Please enter a calorie goal"); return; }
+
+    btn.disabled = true;
+    btn.textContent = "Generating...";
+    output.textContent = "";
+
+    try {
+      const resp = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + ANON_KEY
+        },
+        body: JSON.stringify({
+          calorieGoal: Number(calorieGoal),
+          currentCalories: Number(document.getElementById("currentCalories").value) || 0,
+          allergies: document.getElementById("allergies").value,
+          dietaryNeeds: document.getElementById("dietaryNeeds").value
+        })
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json();
+        alert(err.error || "Something went wrong");
+        return;
+      }
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let fullText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        let idx;
+        while ((idx = buffer.indexOf("\n")) !== -1) {
+          let line = buffer.slice(0, idx);
+          buffer = buffer.slice(idx + 1);
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (!line.startsWith("data: ")) continue;
+          const json = line.slice(6).trim();
+          if (json === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(json);
+            const content = parsed.choices?.[0]?.delta?.content;
+            if (content) {
+              fullText += content;
+              output.textContent = fullText;
+            }
+          } catch { buffer = line + "\n" + buffer; break; }
+        }
+      }
+    } catch (e) {
+      alert("Failed to get suggestions");
+      console.error(e);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Get AI Suggestions";
+    }
+  }
+</script>
+
+</body>
+</html>
