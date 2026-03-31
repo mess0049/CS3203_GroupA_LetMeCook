@@ -1,5 +1,4 @@
-
-function validateAndBuildInput(calorieGoal, currentCalories, allergies, dietaryNeeds) {
+export function buildRequestBody(calorieGoal, currentCalories, allergies, dietaryNeeds) {
   if (!calorieGoal || calorieGoal <= 0) {
     throw new Error("Invalid calorie goal");
   }
@@ -15,5 +14,3 @@ function validateAndBuildInput(calorieGoal, currentCalories, allergies, dietaryN
     dietaryNeeds: dietaryNeeds || ""
   };
 }
-
-export { validateAndBuildInput };
