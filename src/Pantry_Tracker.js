@@ -10,7 +10,7 @@ const SPOONACULAR_API_KEY = "8b2aa49a6a01471cb5679c65a28cc848";
 */
 
 import { db } from "./firebase.js";
-import { doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { doc, getDoc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
 let useringredient = []; // still local copy
 let currentUserUID = null;
@@ -233,6 +233,6 @@ export function _getIngredients() {
   return [...useringredient];
 }
 
-if (typeof document !== "undefined" && document.getElementById("pantryBody")) {
+if (document.getElementById("pantryBody")) {
   displayPantry();
 }
