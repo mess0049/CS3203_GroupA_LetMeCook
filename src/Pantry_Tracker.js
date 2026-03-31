@@ -222,4 +222,17 @@ window.removeIngredient = removeIngredient;
 window.promptEdit = promptEdit;
 window.recommend = recommend;
 
-displayPantry();
+export { removeIngredient };
+
+export function _setIngredients(items) {
+  useringredient.length = 0;
+  useringredient.push(...items);
+}
+
+export function _getIngredients() {
+  return [...useringredient];
+}
+
+if (typeof document !== "undefined" && document.getElementById("pantryBody")) {
+  displayPantry();
+}
