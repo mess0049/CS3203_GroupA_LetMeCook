@@ -1,17 +1,17 @@
 import { auth, db } from "./firebase.js";
 
-// --- FIX: Use full HTTPS URLs for the browser ---
+// --- FIX: Use npm firebase for testing compatibility ---
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+} from "firebase/auth";
 
 import {
   doc,
   setDoc
-} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+} from "firebase/firestore";
 
 // SIGN UP
 export async function signup(email, password) {

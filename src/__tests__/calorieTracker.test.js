@@ -1,4 +1,4 @@
-jest.mock("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js", () => ({
+jest.mock("firebase/firestore", () => ({
   doc: jest.fn(),
   getDoc: jest.fn(),
   setDoc: jest.fn(),
@@ -6,11 +6,11 @@ jest.mock("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js", () 
   arrayUnion: jest.fn(),
 }), { virtual: true });
 
-jest.mock("https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js", () => ({
+jest.mock("firebase/app", () => ({
   initializeApp: jest.fn(),
 }), { virtual: true });
 
-jest.mock("https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js", () => ({
+jest.mock("firebase/auth", () => ({
   getAuth: jest.fn(),
   onAuthStateChanged: jest.fn(),
   signInWithEmailAndPassword: jest.fn(),
