@@ -10,16 +10,16 @@
     "test": "jest --runInBand"
   },
   "jest": {
-  "testEnvironment": "jsdom",
-  "transform": {
-    "^.+\\.js$": "babel-jest"
-  },
-  "globals": {
-    "babel-jest": {
-      "useESM": true
+    "testEnvironment": "jsdom",
+    "transform": {
+      "^.+\\.js$": "babel-jest"
+    },
+    "globals": {
+      "babel-jest": {
+        "useESM": true
+      }
     }
-  }
-},
+  },
   "author": "Group A",
   "license": "ISC",
   "devDependencies": {
@@ -30,8 +30,8 @@
     "babel-jest": "^30.3.0",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
-    "webpack": "^5.105.2",
-    "webpack-cli": "^6.0.1"
+    "webpack": "^5.105.4",
+    "webpack-cli": "^7.0.2"
   },
   "dependencies": {
     "firebase": "^12.11.0"
