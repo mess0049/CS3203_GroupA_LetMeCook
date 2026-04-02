@@ -83,6 +83,10 @@ async function addIngredient() {
         alert("Quantity must be a positive number.");
         return;
     }
+    if (quantity > 9999) {
+        alert("Quantity exceeds the maximum limit.");
+        return;
+    }
 
     // If the ingredient already exists, merge quantity instead of duplicating
     const existing = useringredient.find(
