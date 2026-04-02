@@ -1,39 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Calorie Tracker</title>
+  <meta charset="UTF-8">
+  <title>Let Me Cook | Add Recipe & Calories</title>
   <style>
-    body { font-family: Arial; padding: 20px; }
-    select, button { margin: 5px; padding: 5px; }
-    #summary { margin-top: 20px; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 30px; background-color: #f4f7f6; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    input, button { padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; border-radius: 6px; border: 1px solid #ddd; }
+    button { background-color: #2ecc71; color: white; border: none; cursor: pointer; font-weight: bold; }
+    button:hover { background-color: #27ae60; }
+    #searchResults { background: #fff9e6; border: 1px solid #f1c40f; padding: 10px; border-radius: 6px; margin-top: 15px; }
+    #resultsList li { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #eee; }
+    #resultsList button { width: auto; padding: 5px 10px; font-size: 0.8em; }
+    #summary { margin-top: 20px; border-top: 2px solid #eee; padding-top: 15px; }
+    .secondary-btn { background-color: #34495e; margin-top: 10px; }
   </style>
 </head>
 <body>
 
-  <h1>Calorie Tracker</h1>
+  <div class="container">
+    <h1>Add to Log</h1>
+    
+    <div id="search-section">
+      <label for="foodSearchInput">Search Food Database:</label>
+      <input type="text" id="foodSearchInput" placeholder="Search (e.g., Avocado Toast)">
+      <button onclick="searchFood()">Search API</button>
+    </div>
 
-  <!-- Dropdown for food selection -->
-  <label for="foodSelect">Choose food:</label>
-  <select id="foodSelect">
-    <option value="Apple" data-cal="95">Apple (95 cal)</option>
-    <option value="Banana" data-cal="105">Banana (105 cal)</option>
-    <option value="Chicken Sandwich" data-cal="420">Chicken Sandwich (420 cal)</option>
-    <option value="Yogurt" data-cal="150">Yogurt (150 cal)</option>
-  </select>
+    <div id="searchResults" style="display: none;">
+      <strong>Matching Items:</strong>
+      <ul id="resultsList"></ul>
+    </div>
 
-  <button onclick="addSelectedFood()">Add</button>
+    <div id="summary">
+      <h3>Your Daily Log</h3>
+      <p>Loading your data from Firebase...</p>
+    </div>
 
-  <br>
+    <div style="margin-top: 30px;">
+      <input id="removeName" type="text" placeholder="Type name to remove">
+      <button class="secondary-btn" style="background-color: #e74c3c;" onclick="removeFood()">Remove Entry</button>
+    </div>
 
-  <!-- Remove food input -->
-  <input id="removeName" type="text" placeholder="Food name to remove">
-  <button onclick="removeFood()">Remove</button>
+    <div style="margin-top: 20px;">
+      <button class="secondary-btn" onclick="location.href='dashboard.html'">Return to Dashboard</button>
+    </div>
+  </div>
 
-  <h2>Summary</h2>
-  <div id="summary">No entries yet.</div>
-
-  <button onclick="location.href='dashboard.html'">Return to home page</button>
-  <button onclick="location.href='AI_Suggestions.html'">AI Assistant</button>
   <script type="module" src="LetMeCook.js"></script>
 </body>
 </html>
