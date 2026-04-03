@@ -5,24 +5,26 @@ import { observeAuth } from "./auth.js";
 let meals = [];
 let currentUserUID = null;
 
-observeAuth(async (uid) => {
-  if (!uid) {
-    window.location.href = "login.html";
-    return;
-  }
+if (typeof document !== "undefined" && document.getElementById) {
+  observeAuth(async (uid) => {
+    if (!uid) {
+      window.location.href = "login.html";
+      return;
+    }
 
-  currentUserUID = uid;
+    currentUserUID = uid;
 
-  const mealRef = doc(db, "meals", uid);
-  const mealSnap = await getDoc(mealRef);
+    const mealRef = doc(db, "meals", uid);
+    const mealSnap = await getDoc(mealRef);
 
-  if (mealSnap.exists()) {
-    meals = mealSnap.data().items || [];
-  } else {
-    meals = [];
-    await setDoc(mealRef, { items: [] });
-  }
-});
+    if (mealSnap.exists()) {
+      meals = mealSnap.data().items || [];
+    } else {
+      meals = [];
+      await setDoc(mealRef, { items: [] });
+    }
+  });
+}
 
 async function saveMealToFirestore() {
   if (!currentUserUID) return;
