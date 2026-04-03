@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Meal Tracker</title>
+  <script type="importmap">
+  {
+    "imports": {
+      "firebase/app": "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js",
+      "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js",
+      "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <h2>Meal Tracker</h2>
+
+  <input id="mealName" type="text" placeholder="Meal name" />
+  <input id="cookDate" type="date" />
+  <button onclick="saveMeal()">Save Meal</button>
+
+  <button onclick="location.href='dashboard.html'">Return to home page</button>
+
+  <script type="module">
+    import { saveMeal } from "./Meal_Tracker.js";
+    window.saveMeal = saveMeal;
+  </script>
+</body>
+</html>
