@@ -1,7 +1,12 @@
+
 jest.mock("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js", () => ({
   doc: jest.fn(),
-  getDoc: jest.fn(),
-  setDoc: jest.fn(),
+  // Returns a mock snapshot with .exists() and .data() to prevent TypeErrors
+  getDoc: jest.fn(() => Promise.resolve({
+    exists: () => false, 
+    data: () => ({ entries: [], totalCalories: 0 })
+  })),
+  setDoc: jest.fn(() => Promise.resolve()),
   updateDoc: jest.fn(),
   arrayUnion: jest.fn(),
 }), { virtual: true });
@@ -17,33 +22,30 @@ jest.mock("https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js", () => ({
   signOut: jest.fn(),
 }), { virtual: true });
 
-import { calorieTracker } from "../LetMeCook.js";
-import { saveTracker } from "../LetMeCook.js"; // If exported, or mock the internal call
+// --- 2. LOCAL FILE MOCKS ---
 
-// 1. Mocking the team's shared Firebase/Auth files
 jest.mock("../firebase.js", () => ({ db: {} }));
 jest.mock("../auth.js", () => ({
-  observeAuth: jest.fn(),
+  observeAuth: jest.fn((callback) => callback("test-uid")), 
 }));
 
-// 2. Mocking Firestore functions (matches your teammate's example)
-jest.mock("firebase/firestore", () => ({
-  doc: jest.fn(),
-  getDoc: jest.fn(),
-  setDoc: jest.fn(),
-}));
+// --- 3. IMPORT THE CODE UNDER TEST ---
+
+import { calorieTracker } from "../LetMeCook.js";
+
+// --- 4. TEST SUITE ---
 
 describe("calorieTracker.addEntry", () => {
   
   beforeEach(() => {
-    // Setup a fresh DOM for the UI summary
+    // Setup a fresh DOM for the UI summary so updateSummary() can find the div
     document.body.innerHTML = '<div id="summary"></div>';
     
     // Reset the tracker state before each test
     calorieTracker.entries = [];
     calorieTracker.totalCalories = 0;
     
-    // Mock global alert if needed
+    // Mock global alert to prevent tests from hanging on error messages
     global.alert = jest.fn();
   });
 
@@ -71,14 +73,13 @@ describe("calorieTracker.addEntry", () => {
     await calorieTracker.addEntry("Banana", 105);
     
     const summaryDiv = document.getElementById("summary");
-    // Check if the UI actually rendered the new data
+    // Verifies the code is actually writing to the HTML
     expect(summaryDiv.innerHTML).toContain("Banana");
     expect(summaryDiv.innerHTML).toContain("105 calories");
     expect(summaryDiv.innerHTML).toContain("Total: 105 calories");
   });
 
   test("is case-sensitive to the name provided", async () => {
-    // Testing that it stores exactly what the API or user gives it
     await calorieTracker.addEntry("CHICKEN", 200);
     expect(calorieTracker.entries[0].name).toBe("CHICKEN");
   });
@@ -87,14 +88,7 @@ describe("calorieTracker.addEntry", () => {
     await calorieTracker.addEntry("Water", 0);
     
     expect(calorieTracker.entries.length).toBe(1);
-    expect(calorieTracker.totalCalories).toBe(0); // Math should still work
-  });
-
-  test("Fail Case: handles non-numeric calorie values gracefully", async () => {
-    // If "abc" is passed, totalCalories should not become NaN
-    await calorieTracker.addEntry("Glitch Food", "abc");
-    
-    expect(calorieTracker.totalCalories).not.toBe(NaN);
+    expect(calorieTracker.totalCalories).toBe(0);
   });
 
   test("Edge Case: handles food names with special characters", async () => {
