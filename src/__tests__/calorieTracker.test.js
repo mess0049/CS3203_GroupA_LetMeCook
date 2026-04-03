@@ -1,7 +1,7 @@
 
 jest.mock("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js", () => ({
-  doc: jest.fn(),
-  // Returns a mock snapshot with .exists() and .data() to prevent TypeErrors
+  doc: jest.fn(() => ({ id: 'mock-doc-id' })), 
+  
   getDoc: jest.fn(() => Promise.resolve({
     exists: () => false, 
     data: () => ({ entries: [], totalCalories: 0 })

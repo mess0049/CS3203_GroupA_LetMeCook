@@ -1,5 +1,13 @@
 import { db } from "./firebase.js";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+
+// Import from the specific Firestore bundle
+import { 
+  doc, 
+  getDoc, 
+  setDoc, 
+  updateDoc, 
+  arrayUnion 
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { observeAuth } from "./auth.js";
 
 let currentUserUID = null;
