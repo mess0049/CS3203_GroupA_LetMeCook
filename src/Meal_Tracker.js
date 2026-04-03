@@ -1,15 +1,33 @@
-import { db } from "../firebase.js";
-import { observeAuth } from "../auth.js";
-import { doc, getDoc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { db } from "./firebase.js";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { observeAuth } from "./auth.js";
 
 let meals = [];
+let currentUserUID = null;
 
-export function _setMeals(newMeals) {
-  meals = newMeals;
-}
+observeAuth(async (uid) => {
+  if (!uid) {
+    window.location.href = "login.html";
+    return;
+  }
 
-export function _getMeals() {
-  return meals;
+  currentUserUID = uid;
+
+  const mealRef = doc(db, "meals", uid);
+  const mealSnap = await getDoc(mealRef);
+
+  if (mealSnap.exists()) {
+    meals = mealSnap.data().items || [];
+  } else {
+    meals = [];
+    await setDoc(mealRef, { items: [] });
+  }
+});
+
+async function saveMealToFirestore() {
+  if (!currentUserUID) return;
+  const mealRef = doc(db, "meals", currentUserUID);
+  await setDoc(mealRef, { items: meals });
 }
 
 export async function saveMeal() {
@@ -46,4 +64,13 @@ export async function saveMeal() {
 
   const meal = { name, cookDate };
   meals.push(meal);
+  await saveMealToFirestore();
+}
+
+export function _setMeals(newMeals) {
+  meals = newMeals;
+}
+
+export function _getMeals() {
+  return meals;
 }
