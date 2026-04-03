@@ -5,7 +5,7 @@ import { observeAuth } from "./auth.js";
 let meals = [];
 let currentUserUID = null;
 
-if (typeof document !== "undefined" && document.getElementById) {
+if (typeof process === "undefined" || process.env.NODE_ENV !== "test") {
   observeAuth(async (uid) => {
     if (!uid) {
       window.location.href = "login.html";
@@ -56,8 +56,9 @@ export async function saveMeal() {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const selected = new Date(cookDate);
-  selected.setHours(0, 0, 0, 0);
+ const [year, month, day] = cookDate.split("-").map(Number);
+const selected = new Date(year, month - 1, day);
+selected.setHours(0, 0, 0, 0);
 
   if (selected < today) {
     alert("Cook date cannot be in the past.");
