@@ -12,7 +12,18 @@ jest.mock("firebase/firestore", () => ({
   setDoc: jest.fn(),
   updateDoc: jest.fn(),
   arrayUnion: jest.fn(),
-}));
+}), { virtual: true });
+
+jest.mock("firebase/app", () => ({
+  initializeApp: jest.fn(),
+}), { virtual: true });
+
+jest.mock("https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js", () => ({
+  getAuth: jest.fn(),
+  onAuthStateChanged: jest.fn(),
+  signInWithEmailAndPassword: jest.fn(),
+  signOut: jest.fn(),
+}), { virtual: true });
 
 describe("removeIngredient", () => {
 
