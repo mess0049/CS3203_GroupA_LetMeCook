@@ -1,21 +1,10 @@
-const SPOONACULAR_API_KEY = "8b2aa49a6a01471cb5679c65a28cc848";
-
-//dummy database need to change to database
-/*let useringredient = [
-    { name: "Egg", quantity: 5},
-    { name: "Milk", quantity: 1},
-    { name: "Tomato", quantity: 3},
-    { name: "Bread", quantity: 2}
-];
-*/
-
 import { db } from "./firebase.js";
-import { doc, getDoc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
-
-let useringredient = []; // still local copy
-let currentUserUID = null;
-
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { observeAuth } from "./auth.js";
+import { getRecipesByIngredients } from "./SpoonacularAPI.js";
+
+let useringredient = [];
+let currentUserUID = null;
 
 observeAuth(async (uid) => {
   if (!uid) {
@@ -25,7 +14,6 @@ observeAuth(async (uid) => {
 
   currentUserUID = uid;
 
-  // Load pantry from Firestore
   const pantryRef = doc(db, "pantries", uid);
   const pantrySnap = await getDoc(pantryRef);
 
@@ -33,16 +21,15 @@ observeAuth(async (uid) => {
     useringredient = pantrySnap.data().items || [];
   } else {
     useringredient = [];
-    await setDoc(pantryRef, { items: [] }); // create empty pantry for new users
+    await setDoc(pantryRef, { items: [] });
   }
 
   displayPantry();
 });
- 
-//show refrigerator_ingredients when load page
+
 function displayPantry() {
     const pantryBody = document.getElementById("pantryBody");
-    pantryBody.innerHTML = ""; //Reset
+    pantryBody.innerHTML = "";
 
     if (useringredient.length === 0) {
         pantryBody.innerHTML = "<tr><td>Your pantry is empty. Add some ingredients!</td></tr>";
@@ -83,7 +70,7 @@ async function addIngredient() {
         alert("Quantity must be a positive number.");
         return;
     }
-    // If the ingredient already exists, merge quantity instead of duplicating
+
     const existing = useringredient.find(
         item => item.name.toLowerCase() === name.toLowerCase()
     );
@@ -106,11 +93,11 @@ async function removeIngredient(name) {
         item => item.name.toLowerCase() === name.toLowerCase()
     );
     if (index === -1) {
-        alert(`"${name}" was not found in your pantry.`)
+        alert(`"${name}" was not found in your pantry.`);
         return;
     }
 
-    useringredient.splice(index , 1);
+    useringredient.splice(index, 1);
     displayPantry();
     await savePantry();
 }
@@ -121,7 +108,7 @@ async function promptEdit(name, currentQuantity) {
         currentQuantity
     );
 
-    if (input === null) return; // User hits Cancel
+    if (input === null) return;
 
     const newQuantity = parseInt(input);
 
@@ -144,38 +131,8 @@ async function promptEdit(name, currentQuantity) {
         item.quantity = newQuantity;
         displayPantry();
     }
-
 }
 
-
-async function recipe_check() { // Still need to change to database and implement recipe API
-    const ingredientList = useringredient.map(item => item.name).join(",");
-
-    const url = `https://api.spoonacular.com/recipes/findByIngredients` +
-                `?ingredients=${encodeURIComponent(ingredientList)}` +
-                `&number=5` +
-                `&ranking=2` +
-                `&apiKey=${SPOONACULAR_API_KEY}`;
-    
-    const response = await fetch(url);
-
-    if (!response.ok) {
-        throw new Error(`API responded with status ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    return data.map(function(recipe) {
-        return {
-            name: recipe.title,
-            usedIngredients: recipe.usedIngredients.map(i => i.name),
-            missedIngredients: recipe.missedIngredients.map(i => i.name),
-            image: recipe.image
-        };
-    });
-}
-
-//when press recommend button
 async function recommend() {
     const recipeListElement = document.getElementById("Choosed_Recipes");
 
@@ -187,7 +144,7 @@ async function recommend() {
     recipeListElement.innerHTML = "<li>Loading recipes...</li>";
 
     try {
-        const final_recipes = await recipe_check();
+        const final_recipes = await getRecipesByIngredients(useringredient);
         recipeListElement.innerHTML = "";
 
         if (final_recipes.length === 0) {
@@ -221,7 +178,7 @@ window.removeIngredient = removeIngredient;
 window.promptEdit = promptEdit;
 window.recommend = recommend;
 
-export { removeIngredient, addIngredient};
+export { removeIngredient, addIngredient };
 
 export function _setIngredients(items) {
   useringredient.length = 0;
