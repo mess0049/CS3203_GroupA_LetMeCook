@@ -1,4 +1,4 @@
-import{addIngredient, _setIngredients, _getIngredients} from "../Pantry_Tracker.js";
+import{addIngredient, _setIngredients, _getIngredients} from "../SpoonacularAPI/Pantry_Tracker.js";
 
 jest.mock("../firebase.js", () => ({ db: {} }));
 

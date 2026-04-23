@@ -1,8 +1,8 @@
-import { db } from "./firebase.js";
+import { db } from "../firebase.js";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { observeAuth } from "./auth.js";
+import { observeAuth } from "../auth.js";
 import { getRecipesByIngredients } from "./SpoonacularAPI.js";
-import { register } from "./user data/userdata.js";
+import { register } from "../user data/userdata.js";
 
 let useringredient = [];
 let currentUserUID = null;
