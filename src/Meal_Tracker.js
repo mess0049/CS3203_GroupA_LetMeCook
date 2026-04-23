@@ -1,6 +1,7 @@
 import { db } from "./firebase.js";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { observeAuth } from "./auth.js";
+import { register } from "./user data/userdata.js";
 
 let meals = [];
 let currentUserUID = null;
@@ -31,6 +32,8 @@ async function saveMealToFirestore() {
   const mealRef = doc(db, "meals", currentUserUID);
   await setDoc(mealRef, { items: meals });
 }
+
+register("meals", saveMealToFirestore);
 
 export async function saveMeal() {
   const nameInput = document.getElementById("mealName");

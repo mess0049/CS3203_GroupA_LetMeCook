@@ -1,14 +1,15 @@
 import { db } from "./firebase.js";
 
 // Import from the specific Firestore bundle
-import { 
-  doc, 
-  getDoc, 
-  setDoc, 
-  updateDoc, 
-  arrayUnion 
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  arrayUnion
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { observeAuth } from "./auth.js";
+import { register } from "./user data/userdata.js";
 
 let currentUserUID = null;
 const apiKey = "957797d0d0934d3d885f8d54b8f06294"; // Your Spoonacular Key
@@ -17,11 +18,13 @@ const apiKey = "957797d0d0934d3d885f8d54b8f06294"; // Your Spoonacular Key
 async function saveTracker() {
   if (!currentUserUID) return;
   const ref = doc(db, "calories", currentUserUID);
-  await setDoc(ref, { 
-    entries: calorieTracker.entries, 
-    totalCalories: calorieTracker.totalCalories 
+  await setDoc(ref, {
+    entries: calorieTracker.entries,
+    totalCalories: calorieTracker.totalCalories
   });
 }
+
+register("calories", saveTracker);
 
 observeAuth(async (uid) => {
   if (!uid) {

@@ -1,124 +1,200 @@
-import { observeAuth } from "../auth.js";
-import { calorieTracker } from "../LetMeCook.js";
-import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { auth, db } from "../firebase.js";
+// Tests for userdata.js — the periodic auto-save and sync layer.
+//
+// userdata.js registers event listeners and calls observeAuth at import time.
+// We capture the observeAuth callback so we can simulate login/logout manually,
+// and use fake timers to control setInterval without waiting real time.
 
-jest.mock("../firebase.js", () => ({ auth: {}, db: {} }));
+let capturedAuthCallback = null;
 
-jest.mock("firebase/auth", () => ({
-  onAuthStateChanged: jest.fn(),
-  signOut: jest.fn(),
-  createUserWithEmailAndPassword: jest.fn(),
-  signInWithEmailAndPassword: jest.fn(),
-}));
-
-jest.mock("firebase/firestore", () => ({
-  doc: jest.fn(),
-  getDoc: jest.fn(),
-  setDoc: jest.fn(),
-}));
-
-jest.mock(
-  "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js",
-  () => ({
-    doc: jest.fn(),
-    getDoc: jest.fn(),
-    setDoc: jest.fn(),
+jest.mock("../auth.js", () => ({
+  observeAuth: jest.fn((cb) => {
+    capturedAuthCallback = cb;
   }),
-  { virtual: true }
-);
+}));
 
-const fakeEntries = [{ name: "Apple", calories: 95 }];
-const fakeUID = "user123";
+// Fake timers let us advance setInterval without real delays.
+beforeAll(() => { jest.useFakeTimers(); });
+afterAll(() => { jest.useRealTimers(); });
 
-describe("currentUserData", () => {
-  beforeEach(() => {
-    calorieTracker.entries = [];
-    calorieTracker.totalCalories = 0;
-    doc.mockReturnValue("fake-doc-ref");
+// Re-import a fresh copy of the module before every test so side-effects
+// (addEventListener, observeAuth) are re-registered in a clean state.
+let register, unregister;
+
+beforeEach(async () => {
+  jest.resetModules();
+  capturedAuthCallback = null;
+  document.body.innerHTML = "";
+
+  const mod = await import("../user data/userdata.js");
+  register = mod.register;
+  unregister = mod.unregister;
+});
+
+afterEach(() => {
+  jest.clearAllTimers();
+  jest.clearAllMocks();
+});
+
+// ---------------------------------------------------------------------------
+
+describe("currentUserData — register / unregister", () => {
+
+  // Normal: a registered save function runs on the periodic interval.
+  test("testValidSave: registered function is called once per interval tick", async () => {
+    const saveFn = jest.fn().mockResolvedValue();
+    register("calories", saveFn);
+
+    capturedAuthCallback("uid-abc"); // simulate login → starts interval
+    jest.advanceTimersByTime(60_001);
+    await Promise.resolve();
+
+    expect(saveFn).toHaveBeenCalledTimes(1);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  // Normal: multiple sources are all saved each tick.
+  test("testMultipleSources: all registered functions are called on each tick", async () => {
+    const saveMeals   = jest.fn().mockResolvedValue();
+    const savePantry  = jest.fn().mockResolvedValue();
+    const saveCalories = jest.fn().mockResolvedValue();
+    register("meals",    saveMeals);
+    register("pantry",   savePantry);
+    register("calories", saveCalories);
+
+    capturedAuthCallback("uid-abc");
+    jest.advanceTimersByTime(60_001);
+    await Promise.resolve();
+
+    expect(saveMeals).toHaveBeenCalledTimes(1);
+    expect(savePantry).toHaveBeenCalledTimes(1);
+    expect(saveCalories).toHaveBeenCalledTimes(1);
   });
 
-  // Valid login: user is authenticated and Firestore returns data
-  test("testValidLogin: loads user data when logged in with a valid session", (done) => {
-    onAuthStateChanged.mockImplementation((auth, callback) => {
-      callback({ uid: fakeUID });
-    });
+  // Normal: unregistered functions are not called.
+  test("testUnregister: removed function is not called after unregister", async () => {
+    const saveFn = jest.fn().mockResolvedValue();
+    register("temp", saveFn);
+    unregister("temp");
 
-    getDoc.mockResolvedValue({
-      exists: () => true,
-      data: () => ({ entries: fakeEntries, totalCalories: 95 }),
-    });
+    capturedAuthCallback("uid-abc");
+    jest.advanceTimersByTime(60_001);
+    await Promise.resolve();
 
-    observeAuth(async (uid) => {
-      if (!uid) return;
+    expect(saveFn).not.toHaveBeenCalled();
+  });
+});
 
-      const snap = await getDoc(doc(db, "calories", uid));
-      if (snap.exists()) {
-        calorieTracker.entries = snap.data().entries;
-        calorieTracker.totalCalories = snap.data().totalCalories;
-      }
+// ---------------------------------------------------------------------------
 
-      expect(uid).toBe(fakeUID);
-      expect(calorieTracker.entries).toEqual(fakeEntries);
-      expect(calorieTracker.totalCalories).toBe(95);
-      done();
-    });
+describe("currentUserData — auth lifecycle", () => {
+
+  // No user logged in: interval must not fire.
+  test("testNoUserLoggedIn: interval does not fire before login", async () => {
+    const saveFn = jest.fn().mockResolvedValue();
+    register("noauth", saveFn);
+
+    // Never call capturedAuthCallback — user stays logged out.
+    jest.advanceTimersByTime(120_001);
+    await Promise.resolve();
+
+    expect(saveFn).not.toHaveBeenCalled();
   });
 
-  // Data mismatch: client state does not match what the server returns
-  test("testDataMismatch: detects mismatch between client state and server data", async () => {
-    calorieTracker.entries = [{ name: "Banana", calories: 105 }];
-    calorieTracker.totalCalories = 105;
+  // Session expired / logout: interval must stop after logout.
+  test("testSessionExpired: interval stops after logout and no further saves occur", async () => {
+    const saveFn = jest.fn().mockResolvedValue();
+    register("lifecycle", saveFn);
 
-    getDoc.mockResolvedValue({
-      exists: () => true,
-      data: () => ({ entries: fakeEntries, totalCalories: 95 }),
-    });
+    capturedAuthCallback("uid-abc"); // login
+    jest.advanceTimersByTime(60_001);
+    await Promise.resolve();
+    expect(saveFn).toHaveBeenCalledTimes(1);
 
-    const snap = await getDoc(doc(db, "calories", fakeUID));
-    const serverData = snap.data();
+    capturedAuthCallback(null); // logout — interval should stop
 
-    expect(calorieTracker.totalCalories).not.toBe(serverData.totalCalories);
-    expect(calorieTracker.entries[0].name).not.toBe(serverData.entries[0].name);
+    jest.advanceTimersByTime(60_001);
+    await Promise.resolve();
+
+    // Still only 1 call — no saves after logout.
+    expect(saveFn).toHaveBeenCalledTimes(1);
   });
 
-  // No user logged in: observeAuth fires with null
-  test("testNoUserLoggedIn: returns null when no user is logged in", (done) => {
-    onAuthStateChanged.mockImplementation((auth, callback) => {
-      callback(null);
-    });
+  // Data integrity: two interval ticks produce exactly two saves.
+  test("testDataIntegrity: saves fire once per tick over multiple intervals", async () => {
+    const saveFn = jest.fn().mockResolvedValue();
+    register("integrity", saveFn);
 
-    observeAuth((uid) => {
-      expect(uid).toBeNull();
-      done();
-    });
+    capturedAuthCallback("uid-abc");
+    jest.advanceTimersByTime(120_001); // two full ticks
+    await Promise.resolve();
+
+    expect(saveFn).toHaveBeenCalledTimes(2);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe("currentUserData — browser events", () => {
+
+  // Coming back online should immediately sync data.
+  test("testOnlineSync: 'online' event triggers an immediate save", async () => {
+    const saveFn = jest.fn().mockResolvedValue();
+    register("online-test", saveFn);
+
+    window.dispatchEvent(new Event("online"));
+    await Promise.resolve();
+
+    expect(saveFn).toHaveBeenCalledTimes(1);
   });
 
-  // Session expired: Firebase clears currentUser to null, same as logged out
-  test("testSessionExpired: returns null when the session has expired", (done) => {
-    onAuthStateChanged.mockImplementation((auth, callback) => {
-      callback(null);
-    });
+  // Page close / navigate away should attempt a final save.
+  test("testBeforeUnload: 'beforeunload' event triggers an immediate save", async () => {
+    const saveFn = jest.fn().mockResolvedValue();
+    register("unload-test", saveFn);
 
-    observeAuth((uid) => {
-      expect(uid).toBeNull();
-      done();
-    });
+    window.dispatchEvent(new Event("beforeunload"));
+    await Promise.resolve();
+
+    expect(saveFn).toHaveBeenCalledTimes(1);
   });
 
-  // Network disconnected: Firestore throws on getDoc
-  test("testServerDisconnected: throws when disconnected from the server", async () => {
-    getDoc.mockRejectedValue(
-      Object.assign(new Error("network error"), { code: "NETWORK_ERROR" })
-    );
+  // Server disconnected: save function rejects but module does not throw.
+  test("testServerDisconnected: failed save is handled without crashing", async () => {
+    const failingFn = jest.fn().mockRejectedValue(new Error("network error"));
+    register("network-test", failingFn);
 
-    await expect(getDoc(doc(db, "calories", fakeUID))).rejects.toThrow(
-      "network error"
-    );
+    // Should resolve (not reject) even when save fails.
+    await expect(
+      window.dispatchEvent(new Event("online")) || Promise.resolve()
+    ).resolves.not.toThrow();
+
+    await Promise.resolve();
+    expect(failingFn).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe("currentUserData — status indicator", () => {
+
+  // Indicator is injected into the DOM.
+  test("testStatusCreated: indicator element is added to the DOM", () => {
+    document.dispatchEvent(new Event("DOMContentLoaded"));
+    expect(document.getElementById("autosave-status")).not.toBeNull();
+  });
+
+  // Indicator is not duplicated on repeated events.
+  test("testNoDuplication: indicator is not created twice", () => {
+    document.dispatchEvent(new Event("DOMContentLoaded"));
+    document.dispatchEvent(new Event("DOMContentLoaded"));
+    const elements = document.querySelectorAll("#autosave-status");
+    expect(elements.length).toBe(1);
+  });
+
+  // Going offline shows the right label.
+  test("testOfflineStatus: indicator shows 'Offline' when connection is lost", () => {
+    document.dispatchEvent(new Event("DOMContentLoaded"));
+    window.dispatchEvent(new Event("offline"));
+    const el = document.getElementById("autosave-status");
+    expect(el.textContent).toBe("Offline");
   });
 });

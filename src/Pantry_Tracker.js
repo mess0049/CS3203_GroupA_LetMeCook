@@ -2,6 +2,7 @@ import { db } from "./firebase.js";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { observeAuth } from "./auth.js";
 import { getRecipesByIngredients } from "./SpoonacularAPI.js";
+import { register } from "./user data/userdata.js";
 
 let useringredient = [];
 let currentUserUID = null;
@@ -54,6 +55,8 @@ async function savePantry() {
   const pantryRef = doc(db, "pantries", currentUserUID);
   await setDoc(pantryRef, { items: useringredient });
 }
+
+register("pantry", savePantry);
 
 async function addIngredient() {
     const nameInput = document.getElementById("addName");
@@ -130,6 +133,7 @@ async function promptEdit(name, currentQuantity) {
     if (item) {
         item.quantity = newQuantity;
         displayPantry();
+        await savePantry();
     }
 }
 
