@@ -15,6 +15,19 @@
         </script>
     </head>
 <body>
+
+  <!-- setup for emailjs -->
+<script type="text/javascript"
+        src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+</script>
+<script type="text/javascript">
+   (function(){
+      emailjs.init({
+        publicKey: "gb6hDIVxCvwZCuhIv",
+      });
+   })();
+</script>
+
   <h2>Login</h2>
 
   <!--  the buttons and text input boxes -->
@@ -24,23 +37,49 @@
   <button onclick="location.href='../index.html'">Return</button>
 
   <script type="module">
-    import { login } from "./auth.js";
+    import { login, sendMFACode, verifyMFACode } from "./auth.js";
+
+    let pendingUid = null;
 
     // grabs the email and password inputted by the user
     document.getElementById("loginBtn").onclick = async () => {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
 
-      // uses the inputted email and password with firebase's login function
-      // (although renamed) and moves to the dashboard with their database
-      // if it works; otherwise, it gives the user an error
       try {
-        await login(email, password);
-        window.location.href = "../dashboard.html";
+      // Step 1: Normal login
+      const userCred = await login(email, password);
+      pendingUid = userCred.user.uid;
+      
+      // Step 2: Send MFA code
+      await sendMFACode(pendingUid);
+      
+      // Step 3: Show MFA input
+      document.getElementById("mfaSection").style.display = "block";
+      document.getElementById("loginBtn").style.display = "none";
+      alert("Code sent to your email! :)");
       } catch (err) {
-        alert(err.message);
+      alert(err.message);
       }
     };
+
+  // checks inputted 6 digit code; logs in with user's database if correct
+  document.getElementById("verifyMfaBtn").onclick = async () => {
+    const code = document.getElementById("mfaCode").value;
+    try {
+      await verifyMFACode(pendingUid, code);
+      window.location.href = "../dashboard.html";
+    } catch (err) {
+      alert(err.message);
+    }
+  };
   </script>
+
+  <!-- Add MFA input section -->
+<div id="mfaSection" style="display:none;">
+  <input id="mfaCode" type="text" placeholder="Enter 6-digit code">
+  <button id="verifyMfaBtn">Verify</button>
+</div>
+
 </body>
 </html>
