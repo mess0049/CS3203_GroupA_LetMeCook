@@ -29,7 +29,7 @@ No software yet, but you can access it at https://letmecooksofteng.web.app/!
 ## Developer Requirements
 - Coded in JavaScript through VSCode 
 - Download Node.js (https://nodejs.org/en/download) (v24.14.1 (LTS) for (OS) using Docker with npm)
-- Run "npm ci" in the repo directory for Firebase and Jest
+- Run "npm ci" in the repo directory for Firebase, Jest, EmailJS, and other dependencies
   
 ## Usage
 - Track calories and eating habits
@@ -39,11 +39,8 @@ No software yet, but you can access it at https://letmecooksofteng.web.app/!
 - Ask AI for recipe recommendations
 
 ## Support
-If you need to contact the developers for any reason, please reach out to one of these emails:
-- benny.tru@ou.edu
-- william.messer.1@ou.edu
-- Dladd@ou.edu
-- peter.d.pham-1@ou.edu
+For support, please contact:
+letmecook.support@gmail.com
 
 ## Roadmap
 - Calorie Tracker
