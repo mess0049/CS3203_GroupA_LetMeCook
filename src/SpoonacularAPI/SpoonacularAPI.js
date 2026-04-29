@@ -13,7 +13,7 @@ export async function getRecipesByIngredients(ingredients) {
         const response = await fetch(url);
 
         if (!response.ok) {
-            throw new Error(EXTERNAL_RECIPE_SERVICE_FAILURE);
+            throw new Error("EXTERNAL_RECIPE_SERVICE_FAILURE");
         }
 
         const data = await response.json();
