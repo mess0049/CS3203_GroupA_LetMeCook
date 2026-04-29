@@ -8,7 +8,7 @@ import {
   updateDoc,
   arrayUnion
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-import { observeAuth } from "./auth.js";
+import { observeAuth } from "./UserAuthentication/auth.js";
 import { register } from "./user data/userdata.js";
 
 let currentUserUID = null;

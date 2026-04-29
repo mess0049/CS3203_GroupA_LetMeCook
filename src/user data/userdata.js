@@ -1,4 +1,4 @@
-import { observeAuth } from "../auth.js";
+import { observeAuth } from "../UserAuthentication/auth.js";
 
 const INTERVAL_MS = 60_000; // periodic save every 60 seconds
 

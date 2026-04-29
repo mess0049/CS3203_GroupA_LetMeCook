@@ -6,7 +6,7 @@
 
 let capturedAuthCallback = null;
 
-jest.mock("../auth.js", () => ({
+jest.mock("../UserAuthentication/auth.js", () => ({
   observeAuth: jest.fn((cb) => {
     capturedAuthCallback = cb;
   }),
@@ -163,10 +163,14 @@ describe("currentUserData — browser events", () => {
     register("network-test", failingFn);
 
     // Should resolve (not reject) even when save fails.
-    await expect(
-      window.dispatchEvent(new Event("online")) || Promise.resolve()
-    ).resolves.not.toThrow();
-
+    let threw = false;
+    try {
+      window.dispatchEvent(new Event("online"));
+      await Promise.resolve();
+    } catch (e) {
+      threw = true;
+    }
+    expect(threw).toBe(false);
     await Promise.resolve();
     expect(failingFn).toHaveBeenCalledTimes(1);
   });

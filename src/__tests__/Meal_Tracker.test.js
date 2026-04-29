@@ -2,7 +2,7 @@ import { saveMeal, _setMeals, _getMeals } from "../Meal_Tracker.js";
 
 jest.mock("../firebase.js", () => ({ db: {} }));
 
-jest.mock("../auth.js", () => ({
+jest.mock("../UserAuthentication/auth.js", () => ({
   observeAuth: jest.fn(),
 }));
 

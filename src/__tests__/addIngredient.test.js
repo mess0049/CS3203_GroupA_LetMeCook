@@ -2,7 +2,7 @@ import{addIngredient, _setIngredients, _getIngredients} from "../SpoonacularAPI/
 
 jest.mock("../firebase.js", () => ({ db: {} }));
 
-jest.mock("../auth.js", () => ({
+jest.mock("../UserAuthentication/auth.js", () => ({
   observeAuth: jest.fn(),
 }));
 

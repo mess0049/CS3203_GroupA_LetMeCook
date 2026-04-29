@@ -1,6 +1,6 @@
 import { db } from "./firebase.js";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { observeAuth } from "./auth.js";
+import { observeAuth } from "./UserAuthentication/auth.js";
 import { register } from "./user data/userdata.js";
 
 let meals = [];

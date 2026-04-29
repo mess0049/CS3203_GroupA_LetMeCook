@@ -2,7 +2,7 @@ import { removeIngredient, _setIngredients, _getIngredients } from "../Spoonacul
 
 jest.mock("../firebase.js", () => ({ db: {} }));
 
-jest.mock("../auth.js", () => ({
+jest.mock("../UserAuthentication/auth.js", () => ({
   observeAuth: jest.fn(),
 }));
 
