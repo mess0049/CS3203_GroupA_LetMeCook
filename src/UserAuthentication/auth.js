@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase.js";
+import { auth, db } from "../firebase.js";
 
 // --- FIX: Use npm firebase for testing compatibility ---
 import {

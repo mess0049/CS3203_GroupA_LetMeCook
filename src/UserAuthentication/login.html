@@ -1,3 +1,5 @@
+<!--  the login page -->
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -15,21 +17,26 @@
 <body>
   <h2>Login</h2>
 
+  <!--  the buttons and text input boxes -->
   <input id="email" type="email">
   <input id="password" type="password">
   <button id="loginBtn">Login</button>
-  <button onclick="location.href='index.html'">Return</button>
+  <button onclick="location.href='../index.html'">Return</button>
 
   <script type="module">
     import { login } from "./auth.js";
 
+    // grabs the email and password inputted by the user
     document.getElementById("loginBtn").onclick = async () => {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
 
+      // uses the inputted email and password with firebase's login function
+      // (although renamed) and moves to the dashboard with their database
+      // if it works; otherwise, it gives the user an error
       try {
         await login(email, password);
-        window.location.href = "dashboard.html";
+        window.location.href = "../dashboard.html";
       } catch (err) {
         alert(err.message);
       }

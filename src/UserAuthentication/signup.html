@@ -1,3 +1,5 @@
+<!-- the signup page -->
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -15,21 +17,27 @@
 <body>
   <h2>Sign Up</h2>
 
+  <!-- buttons and text input boxes -->
   <input id="email" type="email" placeholder="Email">
   <input id="password" type="password" placeholder="Password">
   <button id="signupBtn">Sign Up</button>
+  <button onclick="location.href='../index.html'">Return</button>
 
   <script type="module">
     import { signup } from "./auth.js";
 
+    // gets the email and password inputted by the user
     document.getElementById("signupBtn").onclick = async () => {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
 
+       // uses the inputted email and password with firebase's signup function
+      // (although renamed) and moves to the dashboard with a new database assigned
+      //to them if it works; otherwise, it gives the user an error
       try {
         await signup(email, password);
         alert("Account created!");
-        window.location.href = "dashboard.html";
+        window.location.href = "../dashboard.html";
       } catch (err) {
         alert(err.message);
       }
