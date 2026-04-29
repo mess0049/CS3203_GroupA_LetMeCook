@@ -4,9 +4,11 @@ import { observeAuth } from "../auth.js";
 import { getRecipesByIngredients } from "./SpoonacularAPI.js";
 import { register } from "../user data/userdata.js";
 
+// Local state tracking to avoid frequent database reads
 let useringredient = [];
 let currentUserUID = null;
 
+// Manage user session lifecycle and sync Firestore data to local state
 observeAuth(async (uid) => {
   if (!uid) {
     window.location.href = "login.html";
@@ -28,6 +30,7 @@ observeAuth(async (uid) => {
   displayPantry();
 });
 
+// Dynamically render the pantry table based on the local array
 function displayPantry() {
     const pantryBody = document.getElementById("pantryBody");
     pantryBody.innerHTML = "";
@@ -50,6 +53,7 @@ function displayPantry() {
     });
 }
 
+// Commit local state changes to Firestore
 async function savePantry() {
   if (!currentUserUID) return;
   const pantryRef = doc(db, "pantries", currentUserUID);
@@ -58,6 +62,7 @@ async function savePantry() {
 
 register("pantry", savePantry);
 
+// Handle ingredient deduplication and quantity updates
 async function addIngredient() {
     const nameInput = document.getElementById("addName");
     const quantityInput = document.getElementById("addQuantity");
@@ -65,6 +70,7 @@ async function addIngredient() {
     const name = nameInput.value.trim();
     const quantity = parseInt(quantityInput.value);
 
+    // Guard clauses for input validation
     if (!name) {
         alert("Please enter an ingredient name.");
         return;
@@ -137,6 +143,7 @@ async function promptEdit(name, currentQuantity) {
     }
 }
 
+// Main integration point between pantry state and external recipe service
 async function recommend() {
     const recipeListElement = document.getElementById("Choosed_Recipes");
 
@@ -172,12 +179,17 @@ async function recommend() {
             recipeListElement.appendChild(li);
         });
     } catch (error) {
+        // Provide sanitized user feedback and mask technical logs
         recipeListElement.innerHTML = "<li>Could not fetch recipes. Please try again later.</li>";
         console.error("[System Notification]: Recipe retrieval failed. Secure logs updated.");
+
+        // Isolate detailed error data for secure, non-client-facing logging
         secureLogToServer("Recipe Recommendation Failure", error);
     }
 }
 
+// Encapsulates sensitive metadata for backend processing
+// Keeps stack traces and system internals out of the browser console
 function secureLogToServer(context, errorObj) {
     const securePayload = {
         timestamp: new Date().toISOString(),
@@ -193,6 +205,7 @@ window.recommend = recommend;
 
 export { removeIngredient, addIngredient };
 
+// Helper functions for managing state across components
 export function _setIngredients(items) {
   useringredient.length = 0;
   useringredient.push(...items);
