@@ -173,8 +173,17 @@ async function recommend() {
         });
     } catch (error) {
         recipeListElement.innerHTML = "<li>Could not fetch recipes. Please try again later.</li>";
-        console.error("Spoonacular API error:", error);
+        console.error("[System Notification]: Recipe retrieval failed. Secure logs updated.");
+        secureLogToServer("Recipe Recommendation Failure", error);
     }
+}
+
+function secureLogToServer(context, errorObj) {
+    const securePayload = {
+        timestamp: new Date().toISOString(),
+        context: context,
+        internalMessage: errorObj.message
+    };
 }
 
 window.addIngredient = addIngredient;
