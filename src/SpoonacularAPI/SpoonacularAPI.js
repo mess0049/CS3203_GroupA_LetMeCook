@@ -9,20 +9,24 @@ export async function getRecipesByIngredients(ingredients) {
                 `&ranking=2` +
                 `&apiKey=${SPOONACULAR_API_KEY}`;
 
-    const response = await fetch(url);
+    try {
+        const response = await fetch(url);
 
-    if (!response.ok) {
-        throw new Error(`API responded with status ${response.status}`);
+        if (!response.ok) {
+            throw new Error(EXTERNAL_RECIPE_SERVICE_FAILURE);
+        }
+
+        const data = await response.json();
+
+        return data.map(function(recipe) {
+            return {
+                name: recipe.title,
+                usedIngredients: recipe.usedIngredients.map(i => i.name),
+                missedIngredients: recipe.missedIngredients.map(i => i.name),
+                image: recipe.image
+            };
+        });
+    } catch (error) {
+        throw new Error("EXTERNAL_RECIPE_SERVICE_FAILURE");
     }
-
-    const data = await response.json();
-
-    return data.map(function(recipe) {
-        return {
-            name: recipe.title,
-            usedIngredients: recipe.usedIngredients.map(i => i.name),
-            missedIngredients: recipe.missedIngredients.map(i => i.name),
-            image: recipe.image
-        };
-    });
 }
