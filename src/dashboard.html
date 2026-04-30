@@ -11,22 +11,47 @@
       }
     }
     </script>
+    <style>
+      body { font-family: sans-serif; background: #f9f9f9; margin: 0; }
+      .page-container { max-width: 480px; margin: 3rem auto; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); text-align: center; }
+      h1 { font-size: 2.4rem; color: #2e8b57; margin-bottom: 0.25rem; }
+      #userEmail { color: #666; font-size: 0.95rem; margin: 0.25rem 0 1.5rem; }
+      #expiryWarning { background: #e67e22; color: white; padding: 10px 14px; border-radius: 6px; margin-bottom: 1rem; font-size: 0.95rem; display: none; }
+      #expiryWarning a { color: white; font-weight: bold; }
+      .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
+      .nav-grid button { padding: 14px 10px; background: #2e8b57; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: background 0.2s; }
+      .nav-grid button:hover { background: #256f46; }
+      .account-row { display: flex; gap: 10px; }
+      .account-row button { flex: 1; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: background 0.2s; }
+      #logoutBtn { background: #dc3545; color: white; }
+      #logoutBtn:hover { background: #b02a37; }
+      #changePasswordBtn { background: #6c757d; color: white; }
+      #changePasswordBtn:hover { background: #5a6268; }
+    </style>
 </head>
 <body>
-  <h2>Dashboard</h2>
-  <div id="expiryWarning" style="background:orange;color:white;padding:10px;display:none">
-    Your password has expired. <a href="UserAuthentication/change-password.html" style="color:white;font-weight:bold">Please change it now.</a>
-  </div>
-  <p id="userEmail"></p>
-  <button id="logoutBtn">Logout</button>
-  <button onclick="location.href='UserAuthentication/change-password.html'">Change Password</button>
 
+<div class="page-container">
   <h1>LetMeCook</h1>
-  <button onclick="location.href='Pantry_Tracker.html'">Open Your Refrigerator</button>
-  <button onclick="location.href='Calorie_Tracker.html'">Calorie Tracker</button>
-  <button onclick="location.href='AI_Suggestions.html'">AI Meal Suggestions</button>
-  <button onclick="location.href='Meal_Tracker.html'">Meal Tracker</button>
-  <button onclick="location.href='Preference_Tracker.html'">⚙ Preferences</button>
+  <p id="userEmail"></p>
+
+  <div id="expiryWarning">
+    Your password has expired. <a href="UserAuthentication/change-password.html">Please change it now.</a>
+  </div>
+
+  <div class="nav-grid">
+    <button onclick="location.href='Pantry_Tracker.html'">🧊 Refrigerator</button>
+    <button onclick="location.href='Calorie_Tracker.html'">🔥 Calorie Tracker</button>
+    <button onclick="location.href='AI_Suggestions.html'">🍽️ AI Meal Suggestions</button>
+    <button onclick="location.href='Meal_Tracker.html'">📅 Meal Tracker</button>
+    <button onclick="location.href='Preference_Tracker.html'" style="grid-column: span 2;">⚙ Preferences</button>
+  </div>
+
+  <div class="account-row">
+    <button id="changePasswordBtn" onclick="location.href='UserAuthentication/change-password.html'">Change Password</button>
+    <button id="logoutBtn">Logout</button>
+  </div>
+</div>
 
   <script type="module">
     import { logout, observeAuth, checkPasswordExpiry } from "./UserAuthentication/auth.js";
