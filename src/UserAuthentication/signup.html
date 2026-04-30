@@ -17,26 +17,64 @@
 <body>
   <h2>Sign Up</h2>
 
-  <!-- buttons and text input boxes -->
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-  <button id="signupBtn">Sign Up</button>
-  <button onclick="location.href='../index.html'">Return</button>
+  <!-- Step 1: account credentials -->
+  <div id="credentialsSection">
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <!-- E.164 format required: +1 for US, e.g. +12025551234 -->
+    <input id="phone" type="tel" placeholder="Phone number (e.g. +12025551234)">
+    <button id="signupBtn">Sign Up</button>
+    <button onclick="location.href='../index.html'">Return</button>
+  </div>
+
+  <!-- Step 2: SMS verification to enroll phone as second factor -->
+  <div id="enrollSection" style="display:none;">
+    <p>A verification code was sent to your phone. Enter it below to enable SMS login.</p>
+    <input id="enrollCode" type="text" placeholder="Enter 6-digit code">
+    <button id="confirmEnrollBtn">Verify Phone</button>
+  </div>
+
+  <!-- Required by Firebase Phone Auth to prevent SMS abuse (renders invisibly) -->
+  <div id="recaptcha-container"></div>
 
   <script type="module">
     import { signup } from "./auth.js";
+    import { initRecaptcha, enrollPhone, confirmEnrollment } from "../user data/sms_mfa.js";
 
-    // gets the email and password inputted by the user
+    initRecaptcha("recaptcha-container");
+
     document.getElementById("signupBtn").onclick = async () => {
-      const email = document.getElementById("email").value;
+      const email    = document.getElementById("email").value;
       const password = document.getElementById("password").value;
+      const phone    = document.getElementById("phone").value.trim();
 
-       // uses the inputted email and password with firebase's signup function
-      // (although renamed) and moves to the dashboard with a new database assigned
-      //to them if it works; otherwise, it gives the user an error
+      if (!phone) {
+        alert("Please enter a phone number for SMS verification.");
+        return;
+      }
+
       try {
+        // Step 1: create the Firebase account (user is now signed in).
         await signup(email, password);
-        alert("Account created!");
+
+        // Step 2: send an SMS to enroll the phone as a second factor.
+        await enrollPhone(phone);
+
+        // Show the code input; hide the credentials form.
+        document.getElementById("credentialsSection").style.display = "none";
+        document.getElementById("enrollSection").style.display = "block";
+
+      } catch (err) {
+        alert(err.message);
+      }
+    };
+
+    document.getElementById("confirmEnrollBtn").onclick = async () => {
+      const code = document.getElementById("enrollCode").value;
+      try {
+        // Step 3: verify the SMS code to complete phone enrollment.
+        await confirmEnrollment(code);
+        alert("Account created and phone verified!");
         window.location.href = "../dashboard.html";
       } catch (err) {
         alert(err.message);

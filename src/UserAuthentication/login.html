@@ -36,50 +36,79 @@
   <button id="loginBtn">Login</button>
   <button onclick="location.href='../index.html'">Return</button>
 
+  <!-- Required by Firebase Phone Auth to prevent SMS abuse (renders invisibly) -->
+  <div id="recaptcha-container"></div>
+
+  <!-- MFA code input — shown after either email or SMS code is sent -->
+  <div id="mfaSection" style="display:none;">
+    <input id="mfaCode" type="text" placeholder="Enter 6-digit code">
+    <button id="verifyMfaBtn">Verify</button>
+  </div>
+
   <script type="module">
     import { login, sendMFACode, verifyMFACode } from "./auth.js";
+    import { initRecaptcha, startSMSLogin, confirmSMSLogin } from "../user data/sms_mfa.js";
 
+    // Tracks which MFA method is active for the verify step.
+    // "email" = existing EmailJS flow, "sms" = Firebase Phone Auth flow.
+    let activeMfaMethod = null;
     let pendingUid = null;
 
-    // grabs the email and password inputted by the user
+    initRecaptcha("recaptcha-container");
+
     document.getElementById("loginBtn").onclick = async () => {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
 
       try {
-      // Step 1: Normal login
-      const userCred = await login(email, password);
-      pendingUid = userCred.user.uid;
-      
-      // Step 2: Send MFA code
-      await sendMFACode(pendingUid);
-      
-      // Step 3: Show MFA input
-      document.getElementById("mfaSection").style.display = "block";
-      document.getElementById("loginBtn").style.display = "none";
-      alert("Code sent to your email! :)");
+        // Step 1: password authentication.
+        // If the user has SMS MFA enrolled in Firebase, this throws
+        // auth/multi-factor-auth-required before completing sign-in.
+        const userCred = await login(email, password);
+
+        // Reached here → user does NOT have Firebase SMS MFA enrolled.
+        // Fall back to the existing email MFA flow.
+        pendingUid = userCred.user.uid;
+        await sendMFACode(pendingUid);
+        activeMfaMethod = "email";
+        document.getElementById("mfaSection").style.display = "block";
+        document.getElementById("loginBtn").style.display = "none";
+        alert("Code sent to your email! :)");
+
       } catch (err) {
-      alert(err.message);
+        if (err.code === "auth/multi-factor-auth-required") {
+          // User has SMS MFA enrolled — send SMS code via Firebase Phone Auth.
+          try {
+            await startSMSLogin(err);
+            activeMfaMethod = "sms";
+            document.getElementById("mfaSection").style.display = "block";
+            document.getElementById("loginBtn").style.display = "none";
+            alert("Code sent by SMS!");
+          } catch (smsErr) {
+            alert(smsErr.message);
+          }
+        } else {
+          alert(err.message);
+        }
       }
     };
 
-  // checks inputted 6 digit code; logs in with user's database if correct
-  document.getElementById("verifyMfaBtn").onclick = async () => {
-    const code = document.getElementById("mfaCode").value;
-    try {
-      await verifyMFACode(pendingUid, code);
-      window.location.href = "../dashboard.html";
-    } catch (err) {
-      alert(err.message);
-    }
-  };
+    document.getElementById("verifyMfaBtn").onclick = async () => {
+      const code = document.getElementById("mfaCode").value;
+      try {
+        if (activeMfaMethod === "sms") {
+          // Firebase Phone Auth verifies the code and completes sign-in.
+          await confirmSMSLogin(code);
+        } else {
+          // Existing email MFA: check code against Firestore.
+          await verifyMFACode(pendingUid, code);
+        }
+        window.location.href = "../dashboard.html";
+      } catch (err) {
+        alert(err.message);
+      }
+    };
   </script>
-
-  <!-- Add MFA input section -->
-<div id="mfaSection" style="display:none;">
-  <input id="mfaCode" type="text" placeholder="Enter 6-digit code">
-  <button id="verifyMfaBtn">Verify</button>
-</div>
 
 </body>
 </html>
