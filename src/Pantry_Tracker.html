@@ -12,47 +12,60 @@
   }
   </script>
   <style>
-    body { font-family: Arial; padding: 20px; line-height: 1.6; }
-    select, button { margin: 5px; padding: 8px 12px; cursor: pointer; }
-    #summary { margin-top: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    body { font-family: sans-serif; background: #f9f9f9; }
+    .page-container { max-width: 680px; margin: 2rem auto; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    h1 { text-align: center; font-size: 2rem; color: #2e8b57; margin-bottom: 0.25rem; }
+    h2 { font-size: 1.4rem; color: #333; margin-top: 1.5rem; }
+    h3 { font-size: 1.2rem; color: #333; margin-top: 1.5rem; }
+    p.subtitle { text-align: center; color: #666; margin-top: 0; }
+    .input-row { display: flex; gap: 10px; margin-top: 0.75rem; align-items: center; }
+    .input-row input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
+    button { padding: 10px 20px; background: #2e8b57; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    button:hover { background: #256f46; }
+    button.secondary { background: #6c757d; }
+    button.secondary:hover { background: #5a6268; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th { background: #2e8b57; color: white; padding: 10px; text-align: left; }
+    td { padding: 10px; border-bottom: 1px solid #eee; }
+    tr:hover td { background: #f0faf4; }
+    ol { padding-left: 1.5rem; line-height: 2; }
+    .section-divider { border: none; border-top: 1px solid #eee; margin: 1.5rem 0; }
   </style>
 </head>
 <body>
 
-    <header>
-        <h1>"User" Pantry</h1>
-        <p>Check ingredients and get recipes.</p>
-    </header>
+<div class="page-container">
+  <h1>Your Pantry</h1>
+  <p class="subtitle">Check ingredients and get recipes.</p>
 
-    <main>
-        <section id="user_ingredient">
-            <h2>Your Refrigerator</h2>
-            <div id ="add-ingredient-form">
-                <input id="addName" type="text" placeholder="Ingredient name" />
-                <input id="addQuantity" type="number" placeholder="Quantity" min="1" />
-                <button onclick="addIngredient()">Add Ingredient</button>
-            </div>
-            <table id="pantryTable">
-                <tbody id="pantryBody">
-                </tbody>
-            </table>
-            <!--data in database-->
-        </section>
+  <hr class="section-divider">
 
-        <section id="recipe-recommendation">
-            <h3>Recommend Recipe</h3>
-            <h4>Choose your recipe!</h4>
-            <button onclick="recommend()">Get Recommended Recipes</button>
-            <ol id="Choosed_Recipes">
-            </ol>
-        </section>
+  <section id="user_ingredient">
+    <h2>Your Refrigerator</h2>
+    <div class="input-row" id="add-ingredient-form">
+      <input id="addName" type="text" placeholder="Ingredient name" />
+      <input id="addQuantity" type="number" placeholder="Qty" min="1" style="max-width:90px;" />
+      <button onclick="addIngredient()">Add</button>
+    </div>
+    <table id="pantryTable">
+      <tbody id="pantryBody"></tbody>
+    </table>
+  </section>
 
-        <button onclick="location.href='dashboard.html'">Return to home page</button>
-    </main>
+  <hr class="section-divider">
 
-    <script type="module" src="SpoonacularAPI/Pantry_Tracker.js"></script>
+  <section id="recipe-recommendation">
+    <h3>Recommend Recipe</h3>
+    <button onclick="recommend()" style="margin-top:0.5rem;">Get Recommended Recipes</button>
+    <ol id="Choosed_Recipes"></ol>
+  </section>
 
-  
+  <hr class="section-divider">
+
+  <button class="secondary" onclick="location.href='dashboard.html'">Return to Dashboard</button>
+</div>
+
+<script type="module" src="SpoonacularAPI/Pantry_Tracker.js"></script>
+
 </body>
 </html>
