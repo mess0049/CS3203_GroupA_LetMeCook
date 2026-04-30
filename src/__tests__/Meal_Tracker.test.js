@@ -1,4 +1,12 @@
 import { saveMeal, _setMeals, _getMeals } from "../Meal_Tracker.js";
+jest.mock("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js", () => ({
+  doc: jest.fn(() => ({ id: 'mock-doc-id' })),
+  getDoc: jest.fn(() => Promise.resolve({
+    exists: () => false,
+    data: () => ({ items: [] })
+  })),
+  setDoc: jest.fn(() => Promise.resolve()),
+}), { virtual: true });
 
 jest.mock("../firebase.js", () => ({ db: {} }));
 
