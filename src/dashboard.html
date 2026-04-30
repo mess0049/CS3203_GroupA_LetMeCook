@@ -5,8 +5,8 @@
     <script type="importmap">
     {
       "imports": {
-        "firebase/app": "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js",
-        "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js",
+        "firebase/app":       "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js",
+        "firebase/auth":      "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js",
         "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js"
       }
     }
@@ -19,19 +19,19 @@
 
   <h1>LetMeCook</h1>
   <button onclick="location.href='Pantry_Tracker.html'">Open Your Refrigerator</button>
-  <button onclick="location.href='LetMeCook.html'">Calorie Tracker</button>
+  <button onclick="location.href='Calorie_Tracker.html'">Calorie Tracker</button>
   <button onclick="location.href='AI_Suggestions.html'">AI Meal Suggestions</button>
   <button onclick="location.href='Meal_Tracker.html'">Meal Tracker</button>
-
+  <button onclick="location.href='Preference_Tracker.html'">⚙ Preferences</button>
 
   <script type="module">
-    import { logout, observeAuth } from "./auth.js";
+    import { logout, observeAuth } from "./UserAuthentication/auth.js";
 
     const emailDisplay = document.getElementById("userEmail");
 
-    observeAuth((user) => {
-      if (user) {
-        emailDisplay.textContent = user.email;
+    observeAuth((uid, email) => {
+      if (uid) {
+        emailDisplay.textContent = email;
       } else {
         window.location.href = "login.html";
       }
