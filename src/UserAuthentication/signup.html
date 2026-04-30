@@ -17,23 +17,46 @@
 <body>
   <h2>Sign Up</h2>
 
-  <!-- buttons and text input boxes -->
-  <input id="email" type="email" placeholder="Email">
+  <input id="email" type="email" placeholder="Email"><br><br>
   <input id="password" type="password" placeholder="Password">
+  <p id="err-uppercase" style="color:red;display:none;margin:4px 0">Must contain at least one uppercase letter.</p>
+  <p id="err-number"    style="color:red;display:none;margin:4px 0">Must contain at least one number.</p>
+  <p id="err-special"   style="color:red;display:none;margin:4px 0">Must contain at least one special character.</p>
+  <br>
   <button id="signupBtn">Sign Up</button>
   <button onclick="location.href='../index.html'">Return</button>
 
   <script type="module">
-    import { signup } from "./auth.js";
+    import { signup, validatePassword } from "./auth.js";
 
-    // gets the email and password inputted by the user
+    const passwordInput = document.getElementById("password");
+    let submitAttempted = false;
+
+    function updateValidationUI() {
+      const pw = passwordInput.value;
+      if (!pw && !submitAttempted) {
+        document.getElementById("err-uppercase").style.display = "none";
+        document.getElementById("err-number").style.display = "none";
+        document.getElementById("err-special").style.display = "none";
+        return;
+      }
+      document.getElementById("err-uppercase").style.display = /[A-Z]/.test(pw) ? "none" : "block";
+      document.getElementById("err-number").style.display    = /[0-9]/.test(pw) ? "none" : "block";
+      document.getElementById("err-special").style.display   = /[^a-zA-Z0-9]/.test(pw) ? "none" : "block";
+    }
+
+    passwordInput.addEventListener("input", updateValidationUI);
+
     document.getElementById("signupBtn").onclick = async () => {
+      submitAttempted = true;
       const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+      const password = passwordInput.value;
 
-       // uses the inputted email and password with firebase's signup function
-      // (although renamed) and moves to the dashboard with a new database assigned
-      //to them if it works; otherwise, it gives the user an error
+      updateValidationUI();
+
+      const errors = validatePassword(password);
+      if (errors.length > 0) return;
+
       try {
         await signup(email, password);
         alert("Account created!");

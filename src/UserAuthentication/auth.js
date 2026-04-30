@@ -5,7 +5,10 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider
 } from "firebase/auth";
 
 import {
@@ -24,15 +27,55 @@ const SERVICE_ID = 'let_me_cook';
 const TEMPLATE_ID = 'mfa_letmecook';
 
 
+// PASSWORD VALIDATION
+export function validatePassword(password) {
+  const errors = [];
+  if (!/[A-Z]/.test(password)) errors.push("Must contain at least one uppercase letter.");
+  if (!/[0-9]/.test(password)) errors.push("Must contain at least one number.");
+  if (!/[^a-zA-Z0-9]/.test(password)) errors.push("Must contain at least one special character.");
+  return errors;
+}
+
 // SIGN UP
 export async function signup(email, password) {
   const userCred = await createUserWithEmailAndPassword(auth, email, password);
 
-  // Save user in database
+  const now = new Date();
+  const passwordExpiresAt = new Date(now);
+  passwordExpiresAt.setMonth(passwordExpiresAt.getMonth() + 6);
+
   await setDoc(doc(db, "users", userCred.user.uid), {
     email: email,
-    createdAt: new Date()
+    createdAt: now,
+    passwordChangedAt: now,
+    passwordExpiresAt: passwordExpiresAt
   });
+}
+
+// CHANGE PASSWORD (requires current password to re-authenticate)
+export async function changePassword(currentPassword, newPassword) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("You must be signed in to change your password.");
+  const credential = EmailAuthProvider.credential(user.email, currentPassword);
+  await reauthenticateWithCredential(user, credential);
+  await updatePassword(user, newPassword);
+
+  const now = new Date();
+  const passwordExpiresAt = new Date(now);
+  passwordExpiresAt.setMonth(passwordExpiresAt.getMonth() + 6);
+
+  await updateDoc(doc(db, "users", user.uid), {
+    passwordChangedAt: now,
+    passwordExpiresAt: passwordExpiresAt
+  });
+}
+
+// CHECK PASSWORD EXPIRY
+export async function checkPasswordExpiry(uid) {
+  const userDoc = await getDoc(doc(db, "users", uid));
+  const data = userDoc.data();
+  if (!data || !data.passwordExpiresAt) return false;
+  return new Date() > data.passwordExpiresAt.toDate();
 }
 
 // LOGIN

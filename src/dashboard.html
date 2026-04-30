@@ -14,8 +14,12 @@
 </head>
 <body>
   <h2>Dashboard</h2>
+  <div id="expiryWarning" style="background:orange;color:white;padding:10px;display:none">
+    Your password has expired. <a href="UserAuthentication/change-password.html" style="color:white;font-weight:bold">Please change it now.</a>
+  </div>
   <p id="userEmail"></p>
   <button id="logoutBtn">Logout</button>
+  <button onclick="location.href='UserAuthentication/change-password.html'">Change Password</button>
 
   <h1>LetMeCook</h1>
   <button onclick="location.href='Pantry_Tracker.html'">Open Your Refrigerator</button>
@@ -25,13 +29,15 @@
   <button onclick="location.href='Preference_Tracker.html'">⚙ Preferences</button>
 
   <script type="module">
-    import { logout, observeAuth } from "./UserAuthentication/auth.js";
+    import { logout, observeAuth, checkPasswordExpiry } from "./UserAuthentication/auth.js";
 
     const emailDisplay = document.getElementById("userEmail");
 
-    observeAuth((uid, email) => {
+    observeAuth(async (uid, email) => {
       if (uid) {
         emailDisplay.textContent = email;
+        const expired = await checkPasswordExpiry(uid);
+        if (expired) document.getElementById("expiryWarning").style.display = "block";
       } else {
         window.location.href = "login.html";
       }
