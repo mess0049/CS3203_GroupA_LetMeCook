@@ -12,16 +12,32 @@
       }
     }
     </script>
-    <!-- 1. Link CSS inside the <head> -->
     <link rel="stylesheet" href="LetMeCook.css">
+    <style>
+      body { font-family: sans-serif; background: #f9f9f9; margin: 0; }
+      .page-container { max-width: 420px; margin: 5rem auto; background: white; padding: 2.5rem 2rem; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); text-align: center; }
+      h1 { font-size: 2.4rem; color: #2e8b57; margin-bottom: 0.5rem; }
+      p.tagline { color: #666; font-size: 1.05rem; margin-bottom: 2rem; }
+      .btn-row { display: flex; gap: 12px; justify-content: center; }
+      a.btn { flex: 1; padding: 12px 0; background: #2e8b57; color: white; text-decoration: none; border-radius: 6px; font-size: 1rem; font-weight: 600; transition: background 0.2s; }
+      a.btn:hover { background: #256f46; }
+      a.btn.secondary { background: #6c757d; }
+      a.btn.secondary:hover { background: #5a6268; }
+    </style>
 </head>
 <body>
-    <h1>Welcome to LetMeCook! Please sign up or login below.</h1>
-    <a href="UserAuthentication/signup.html">Sign Up</a>
-    <a href="UserAuthentication/login.html">Login</a>
-    
-    <script type="module" src="firebase.js"></script>
-    <script type="module" src="UserAuthentication/auth.js"></script>
-    
+
+<div class="page-container">
+  <h1>LetMeCook</h1>
+  <p class="tagline">Your personal cooking and meal planning assistant.</p>
+  <div class="btn-row">
+    <a class="btn" href="UserAuthentication/signup.html">Sign Up</a>
+    <a class="btn secondary" href="UserAuthentication/login.html">Login</a>
+  </div>
+</div>
+
+<script type="module" src="firebase.js"></script>
+<script type="module" src="UserAuthentication/auth.js"></script>
+
 </body>
 </html>
