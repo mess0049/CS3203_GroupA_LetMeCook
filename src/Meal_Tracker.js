@@ -135,6 +135,60 @@ function renderMeals() {
 
 // ── Exported functions (bound to window in HTML) ──────────────────────────────
 
+// export async function handleMealSearch() {
+//   const query = document.getElementById("recipeSearch")?.value;
+//   const resultsDiv = document.getElementById("searchResults");
+//   if (!resultsDiv) return;
+
+//   resultsDiv.innerHTML = "<p>Searching…</p>";
+//   try {
+//     const recipes = await searchMealRecipes(query);
+//     if (!recipes.length) {
+//       resultsDiv.innerHTML = "<p>No recipes found. Try a different search.</p>";
+//       return;
+//     }
+//     resultsDiv.innerHTML = "";
+//     recipes.forEach((r) => {
+//       const card = document.createElement("div");
+//       card.className = "recipe-card";
+//       card.innerHTML = `
+//         <img src="${r.image}" alt="${r.title}" width="80" />
+//         <strong>${r.title}</strong>
+//         <span>${r.readyInMinutes} min · ${r.servings} servings</span>
+//         <label>Cook date: <input type="date" class="plan-date" /></label>
+//         <button onclick="window.addRecipeToMeals('${encodeURIComponent(r.title)}', ${r.id}, this)">
+//           Add to Meal Plan
+//         </button>
+//       `;
+//       resultsDiv.appendChild(card);
+//     });
+//   } catch (err) {
+//     resultsDiv.innerHTML = "<p>Could not fetch recipes. Please try again later.</p>";
+//   }
+// }
+
+function matchesAllPreferences(recipe, prefs) {
+  if (prefs.cuisines?.length) {
+    const matches = prefs.cuisines.some(c =>
+      recipe.cuisines.some(rc => rc.toLowerCase() === c.toLowerCase())
+    );
+    if (!matches) return false;
+  }
+
+  if (prefs.diets?.length) {
+    const matchesAll = prefs.diets.every(d =>
+      recipe.diets.some(rd => rd.toLowerCase() === d.toLowerCase())
+    );
+    if (!matchesAll) return false;
+  }
+
+  if (prefs.maxCookTime && recipe.readyInMinutes > prefs.maxCookTime) {
+    return false;
+  }
+
+  return true;
+}
+
 export async function handleMealSearch() {
   const query = document.getElementById("recipeSearch")?.value;
   const resultsDiv = document.getElementById("searchResults");
@@ -142,29 +196,64 @@ export async function handleMealSearch() {
 
   resultsDiv.innerHTML = "<p>Searching…</p>";
   try {
-    const recipes = await searchMealRecipes(query);
-    if (!recipes.length) {
+    let prefs = {};
+    if (currentUserUID) {
+      try { prefs = await getUserPreferences(currentUserUID); } catch (_) {}
+    }
+
+    const hasPrefs = prefs.cuisines?.length || prefs.diets?.length ||
+                     prefs.allergies?.length || prefs.maxCookTime;
+
+    const allResults = await searchRecipes(query.trim(), {});
+
+    if (!allResults.length) {
       resultsDiv.innerHTML = "<p>No recipes found. Try a different search.</p>";
       return;
     }
+
     resultsDiv.innerHTML = "";
-    recipes.forEach((r) => {
-      const card = document.createElement("div");
-      card.className = "recipe-card";
-      card.innerHTML = `
-        <img src="${r.image}" alt="${r.title}" width="80" />
-        <strong>${r.title}</strong>
-        <span>${r.readyInMinutes} min · ${r.servings} servings</span>
-        <label>Cook date: <input type="date" class="plan-date" /></label>
-        <button onclick="window.addRecipeToMeals('${encodeURIComponent(r.title)}', ${r.id}, this)">
-          Add to Meal Plan
-        </button>
-      `;
-      resultsDiv.appendChild(card);
-    });
+
+    if (hasPrefs) {
+      const preferred = allResults.filter(r => matchesAllPreferences(r, prefs));
+      const others    = allResults.filter(r => !matchesAllPreferences(r, prefs));
+
+      if (preferred.length) {
+        const prefHeader = document.createElement("p");
+        prefHeader.style.cssText = "width:100%; margin:0 0 0.5rem; font-weight:bold; color:#27ae60;";
+        prefHeader.textContent = "✓ Matches your preferences";
+        resultsDiv.appendChild(prefHeader);
+        preferred.forEach(r => resultsDiv.appendChild(buildCard(r)));
+      }
+
+      if (others.length) {
+        const divider = document.createElement("p");
+        divider.style.cssText = "width:100%; margin:0.75rem 0 0.5rem; font-weight:bold; color:#888; border-top: 1px solid #ddd; padding-top:0.75rem;";
+        divider.textContent = "Other results";
+        resultsDiv.appendChild(divider);
+        others.forEach(r => resultsDiv.appendChild(buildCard(r)));
+      }
+    } else {
+      allResults.forEach(r => resultsDiv.appendChild(buildCard(r)));
+    }
+
   } catch (err) {
     resultsDiv.innerHTML = "<p>Could not fetch recipes. Please try again later.</p>";
   }
+}
+
+function buildCard(r) {
+  const card = document.createElement("div");
+  card.className = "recipe-card";
+  card.innerHTML = `
+    <img src="${r.image}" alt="${r.title}" width="80" />
+    <strong>${r.title}</strong>
+    <span>${r.readyInMinutes} min · ${r.servings} servings</span>
+    <label>Cook date: <input type="date" class="plan-date" /></label>
+    <button onclick="window.addRecipeToMeals('${encodeURIComponent(r.title)}', ${r.id}, this)">
+      Add to Meal Plan
+    </button>
+  `;
+  return card;
 }
 
 export async function addRecipeToMeals(encodedTitle, recipeId, btn) {
