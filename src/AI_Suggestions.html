@@ -1,114 +1,241 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Food Suggestions</title>
-  <style>
-    /* Add your own styles to match your site */
-    .ai-form { max-width: 500px; margin: 2rem auto; font-family: sans-serif; }
-    .ai-form label { display: block; margin-top: 1rem; font-weight: 600; }
-    .ai-form input, .ai-form textarea { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 6px; }
-    .ai-form button { margin-top: 1.5rem; padding: 10px 24px; background: #2e8b57; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
-    .ai-form button:disabled { opacity: 0.6; cursor: not-allowed; }
-    #suggestions { max-width: 500px; margin: 2rem auto; white-space: pre-wrap; line-height: 1.6; }
-  </style>
-</head>
-<body>
-
-<div class="ai-form">
-  <h2>🍽️ AI Food Suggestions</h2>
-  <label>Daily Calorie Goal *
-    <input type="number" id="calorieGoal" placeholder="e.g. 2000">
-  </label>
-  <label>Calories Eaten Today
-    <input type="number" id="currentCalories" placeholder="e.g. 800">
-  </label>
-  <label>Allergies
-    <input type="text" id="allergies" placeholder="e.g. peanuts, dairy">
-  </label>
-  <label>Dietary Needs
-    <textarea id="dietaryNeeds" rows="2" placeholder="e.g. high protein, vegan"></textarea>
-  </label>
-  <button id="submitBtn" onclick="getSuggestions()">Get AI Suggestions</button> <button onclick="location.href='Calorie_Tracker.html'">Return</button>
-</div>
-
-<div id="suggestions"></div>
-
-<script>
- 
-  const API_URL = "https://tiqkdnpjiytfquzbbybr.supabase.co/functions/v1/ai-food-suggestions";
-const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpcWtkbnBqaXl0ZnF1emJieWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MDA2NTUsImV4cCI6MjA5MDQ3NjY1NX0.EErkriXnyvVdbio7sgdprOFYkvs9iq4-pRPH30wUACU";
-  
-    async function getSuggestions() {
-    const btn = document.getElementById("submitBtn");
-    const output = document.getElementById("suggestions");
-    const calorieGoal = document.getElementById("calorieGoal").value;
-
-    if (!calorieGoal) { alert("Please enter a calorie goal"); return; }
-
-    btn.disabled = true;
-    btn.textContent = "Generating...";
-    output.textContent = "";
-
-    try {
-      const resp = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + ANON_KEY
-        },
-        body: JSON.stringify({
-          calorieGoal: Number(calorieGoal),
-          currentCalories: Number(document.getElementById("currentCalories").value) || 0,
-          allergies: document.getElementById("allergies").value,
-          dietaryNeeds: document.getElementById("dietaryNeeds").value
-        })
-      });
-
-      if (!resp.ok) {
-        const err = await resp.json();
-        alert(err.error || "Something went wrong");
-        return;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Food Suggestions</title>
+    <meta name="description" content="Get personalized meal ideas based on your goals and dietary needs" />
+    <style>
+      :root {
+        --background: hsl(145, 20%, 97%);
+        --foreground: hsl(150, 30%, 10%);
+        --card: hsl(0, 0%, 100%);
+        --primary: hsl(152, 55%, 38%);
+        --primary-foreground: hsl(0, 0%, 100%);
+        --secondary: hsl(35, 85%, 55%);
+        --muted: hsl(145, 15%, 92%);
+        --muted-foreground: hsl(150, 10%, 45%);
+        --border: hsl(145, 15%, 87%);
+        --destructive: hsl(0, 72%, 55%);
+        --radius: 0.75rem;
+        --card-shadow: 0 4px 24px -4px hsl(152 55% 38% / 0.12);
       }
 
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      let fullText = "";
+      * { box-sizing: border-box; margin: 0; padding: 0; }
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-
-        let idx;
-        while ((idx = buffer.indexOf("\n")) !== -1) {
-          let line = buffer.slice(0, idx);
-          buffer = buffer.slice(idx + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (!line.startsWith("data: ")) continue;
-          const json = line.slice(6).trim();
-          if (json === "[DONE]") break;
-          try {
-            const parsed = JSON.parse(json);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              fullText += content;
-              output.textContent = fullText;
-            }
-          } catch { buffer = line + "\n" + buffer; break; }
-        }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: var(--background);
+        color: var(--foreground);
+        min-height: 100vh;
+        line-height: 1.5;
       }
-    } catch (e) {
-      alert("Failed to get suggestions");
-      console.error(e);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "Get AI Suggestions";
-    }
-  }
-</script>
 
-</body>
+      .container {
+        max-width: 42rem;
+        margin: 0 auto;
+        padding: 2.5rem 1rem;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .icon-badge {
+        width: 3.5rem;
+        height: 3.5rem;
+        margin: 0 auto 1rem;
+        border-radius: 1rem;
+        background: hsl(152 55% 38% / 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+      }
+
+      h1 { font-size: 1.875rem; font-weight: 700; letter-spacing: -0.025em; }
+      .subtitle { color: var(--muted-foreground); margin-top: 0.5rem; }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--card-shadow);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+      }
+
+      .card-header { padding: 1.5rem 1.5rem 0; }
+      .card-title { font-size: 1.125rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+      .card-description { color: var(--muted-foreground); font-size: 0.875rem; margin-top: 0.25rem; }
+      .card-content { padding: 1.5rem; }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .field { margin-bottom: 1rem; }
+      .field label {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 0.375rem;
+      }
+
+      input, textarea {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        font-family: inherit;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: calc(var(--radius) - 2px);
+        color: var(--foreground);
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+      }
+      input:focus, textarea:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px hsl(152 55% 38% / 0.15);
+      }
+      textarea { resize: vertical; min-height: 4rem; }
+
+      button {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        font-weight: 500;
+        font-family: inherit;
+        background: var(--primary);
+        color: var(--primary-foreground);
+        border: none;
+        border-radius: calc(var(--radius) - 2px);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: opacity 0.15s;
+      }
+      button:hover:not(:disabled) { opacity: 0.9; }
+      button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+      .spinner {
+        width: 1rem; height: 1rem;
+        border: 2px solid currentColor;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      .toast {
+        position: fixed;
+        bottom: 1rem; right: 1rem;
+        background: var(--destructive);
+        color: white;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius);
+        box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.2);
+        opacity: 0;
+        transform: translateY(1rem);
+        transition: all 0.2s;
+        z-index: 50;
+        max-width: 20rem;
+      }
+      .toast.show { opacity: 1; transform: translateY(0); }
+
+      .suggestions { white-space: pre-wrap; font-size: 0.95rem; }
+      .suggestions h1, .suggestions h2, .suggestions h3 { margin: 1rem 0 0.5rem; font-weight: 600; }
+      .suggestions ul, .suggestions ol { margin-left: 1.5rem; }
+      .suggestions strong { font-weight: 600; }
+
+      @media (max-width: 480px) {
+        .form-grid { grid-template-columns: 1fr; }
+
+      }
+
+      #suggestion-form {
+  display: flex;
+  flex-direction: column;
+}
+
+#suggestion-form .button-group {
+  display: flex;
+  gap: 0.75rem;
+}
+
+#suggestion-form .button-group button {
+  flex: 1;
+}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="icon-badge">✨</div>
+        <h1>AI Food Suggestions</h1>
+        <p class="subtitle">Get personalized meal ideas based on your goals and dietary needs</p>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🍽️ Your Details</div>
+          <div class="card-description">Tell us about your goals and restrictions</div>
+        </div>
+        <div class="card-content">
+          <form id="suggestion-form">
+            <div class="form-grid">
+              <div>
+                <label for="calorieGoal">Daily Calorie Goal *</label>
+                <input type="number" id="calorieGoal" placeholder="e.g. 2000" min="0" />
+              </div>
+              <div>
+                <label for="currentCalories">Calories Eaten Today</label>
+                <input type="number" id="currentCalories" placeholder="e.g. 800" min="0" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="allergies">⚠️ Allergies</label>
+              <input type="text" id="allergies" placeholder="e.g. peanuts, shellfish, dairy" />
+            </div>
+
+            <div class="field">
+              <label for="dietaryNeeds">🌿 Dietary Needs & Preferences</label>
+              <textarea id="dietaryNeeds" rows="2" placeholder="e.g. high protein, vegetarian, low carb, keto..."></textarea>
+            </div>
+
+            <div class="button-group">
+            <button type="submit" id="submit-btn">
+            <span id="btn-content">✨ Get AI Suggestions</span>
+            </button>
+            <button type="button" id="return-btn">
+            Return
+            </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card" id="results-card" style="display: none;">
+        <div class="card-header">
+          <div class="card-title">✨ Your Personalized Suggestions</div>
+        </div>
+        <div class="card-content">
+          <div class="suggestions" id="suggestions"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="AI_Suggestions.js"></script>
+  </body>
 </html>
