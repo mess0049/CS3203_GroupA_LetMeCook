@@ -2,7 +2,6 @@ const SUPABASE_URL = "https://tiqkdnpjiytfquzbbybr.supabase.co";
 const SUPABASE_ANON_KEY = "YOUR_KEY_HERE"; // (keep your key as-is in your real file)
 const CHAT_URL = `${SUPABASE_URL}/functions/v1/ai-food-suggestions`;
 
-// ---------------- ELEMENTS ----------------
 const form = document.getElementById("suggestion-form");
 const submitBtn = document.getElementById("submit-btn");
 const btnContent = document.getElementById("btn-content");
@@ -11,7 +10,6 @@ const suggestionsEl = document.getElementById("suggestions");
 const toastEl = document.getElementById("toast");
 const returnBtn = document.getElementById("return-btn");
 
-// ---------------- UI HELPERS ----------------
 function showToast(message) {
   toastEl.textContent = message;
   toastEl.classList.add("show");
@@ -33,7 +31,6 @@ if (returnBtn) {
   });
 }
 
-// ---------------- SAFE MARKDOWN RENDER ----------------
 function renderMarkdown(text) {
   let html = text
     .replace(/&/g, "&amp;")
@@ -59,7 +56,7 @@ function renderMarkdown(text) {
   return html.replace(/\n/g, "<br />");
 }
 
-// ---------------- VALIDATION (CWE-20 FIX) ----------------
+//  VALIDATION (CWE-20 FIX)
 const SAFE_TEXT = /^[\p{L}\p{N}\s,.\-'/&()]*$/u;
 
 function normalizeText(text) {
