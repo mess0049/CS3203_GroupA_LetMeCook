@@ -25,13 +25,13 @@ jest.mock("firebase/auth", () => ({
 // --- 2. LOCAL FILE MOCKS ---
 
 jest.mock("../firebase.js", () => ({ db: {} }));
-jest.mock("../auth.js", () => ({
+jest.mock("../UserAuthentication/auth.js", () => ({
   observeAuth: jest.fn((callback) => callback("test-uid")), 
 }));
 
 // --- 3. IMPORT THE CODE UNDER TEST ---
 
-import { calorieTracker } from "../LetMeCook.js";
+import { calorieTracker } from "../Calorie_Tracker.js";
 
 // --- 4. TEST SUITE ---
 

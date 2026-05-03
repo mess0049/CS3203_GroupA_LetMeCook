@@ -26,7 +26,7 @@
   
   (The foundational architecture for storing profiles, pantry items, and logs. The user is able to save and retrieve their data without loss.)
   
-- [Feature] AI Helper - Janathan Tip, Peter Pham - 3/16/26
+- [Feature] AI Helper - Seonghyun Park,Janathan Tip, Peter Pham - 3/16/26
   
   (An AI for facilitating recipe searches and a chat interface for answering general cooking or nutrition questions. User is able to receive help regarding recipe searches or advice.)
   

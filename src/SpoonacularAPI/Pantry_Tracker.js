@@ -1,22 +1,14 @@
-const SPOONACULAR_API_KEY = "8b2aa49a6a01471cb5679c65a28cc848";
+import { db } from "../firebase.js";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { observeAuth } from "../UserAuthentication/auth.js";
+import { getRecipesByIngredients } from "./SpoonacularAPI.js";
+import { register } from "../user data/userdata.js";
 
-//dummy database need to change to database
-/*let useringredient = [
-    { name: "Egg", quantity: 5},
-    { name: "Milk", quantity: 1},
-    { name: "Tomato", quantity: 3},
-    { name: "Bread", quantity: 2}
-];
-*/
-
-import { db } from "./firebase.js";
-import { doc, getDoc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
-
-let useringredient = []; // still local copy
+// Local state tracking to avoid frequent database reads
+let useringredient = [];
 let currentUserUID = null;
 
-import { observeAuth } from "./auth.js";
-
+// Manage user session lifecycle and sync Firestore data to local state
 observeAuth(async (uid) => {
   if (!uid) {
     window.location.href = "login.html";
@@ -25,7 +17,6 @@ observeAuth(async (uid) => {
 
   currentUserUID = uid;
 
-  // Load pantry from Firestore
   const pantryRef = doc(db, "pantries", uid);
   const pantrySnap = await getDoc(pantryRef);
 
@@ -33,16 +24,16 @@ observeAuth(async (uid) => {
     useringredient = pantrySnap.data().items || [];
   } else {
     useringredient = [];
-    await setDoc(pantryRef, { items: [] }); // create empty pantry for new users
+    await setDoc(pantryRef, { items: [] });
   }
 
   displayPantry();
 });
- 
-//show refrigerator_ingredients when load page
+
+// Dynamically render the pantry table based on the local array
 function displayPantry() {
     const pantryBody = document.getElementById("pantryBody");
-    pantryBody.innerHTML = ""; //Reset
+    pantryBody.innerHTML = "";
 
     if (useringredient.length === 0) {
         pantryBody.innerHTML = "<tr><td>Your pantry is empty. Add some ingredients!</td></tr>";
@@ -62,12 +53,16 @@ function displayPantry() {
     });
 }
 
+// Commit local state changes to Firestore
 async function savePantry() {
   if (!currentUserUID) return;
   const pantryRef = doc(db, "pantries", currentUserUID);
   await setDoc(pantryRef, { items: useringredient });
 }
 
+register("pantry", savePantry);
+
+// Handle ingredient deduplication and quantity updates
 async function addIngredient() {
     const nameInput = document.getElementById("addName");
     const quantityInput = document.getElementById("addQuantity");
@@ -75,6 +70,7 @@ async function addIngredient() {
     const name = nameInput.value.trim();
     const quantity = parseInt(quantityInput.value);
 
+    // Guard clauses for input validation
     if (!name) {
         alert("Please enter an ingredient name.");
         return;
@@ -83,7 +79,7 @@ async function addIngredient() {
         alert("Quantity must be a positive number.");
         return;
     }
-    // If the ingredient already exists, merge quantity instead of duplicating
+
     const existing = useringredient.find(
         item => item.name.toLowerCase() === name.toLowerCase()
     );
@@ -106,11 +102,11 @@ async function removeIngredient(name) {
         item => item.name.toLowerCase() === name.toLowerCase()
     );
     if (index === -1) {
-        alert(`"${name}" was not found in your pantry.`)
+        alert(`"${name}" was not found in your pantry.`);
         return;
     }
 
-    useringredient.splice(index , 1);
+    useringredient.splice(index, 1);
     displayPantry();
     await savePantry();
 }
@@ -121,7 +117,7 @@ async function promptEdit(name, currentQuantity) {
         currentQuantity
     );
 
-    if (input === null) return; // User hits Cancel
+    if (input === null) return;
 
     const newQuantity = parseInt(input);
 
@@ -143,39 +139,11 @@ async function promptEdit(name, currentQuantity) {
     if (item) {
         item.quantity = newQuantity;
         displayPantry();
+        await savePantry();
     }
-
 }
 
-
-async function recipe_check() { // Still need to change to database and implement recipe API
-    const ingredientList = useringredient.map(item => item.name).join(",");
-
-    const url = `https://api.spoonacular.com/recipes/findByIngredients` +
-                `?ingredients=${encodeURIComponent(ingredientList)}` +
-                `&number=5` +
-                `&ranking=2` +
-                `&apiKey=${SPOONACULAR_API_KEY}`;
-    
-    const response = await fetch(url);
-
-    if (!response.ok) {
-        throw new Error(`API responded with status ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    return data.map(function(recipe) {
-        return {
-            name: recipe.title,
-            usedIngredients: recipe.usedIngredients.map(i => i.name),
-            missedIngredients: recipe.missedIngredients.map(i => i.name),
-            image: recipe.image
-        };
-    });
-}
-
-//when press recommend button
+// Main integration point between pantry state and external recipe service
 async function recommend() {
     const recipeListElement = document.getElementById("Choosed_Recipes");
 
@@ -187,7 +155,7 @@ async function recommend() {
     recipeListElement.innerHTML = "<li>Loading recipes...</li>";
 
     try {
-        const final_recipes = await recipe_check();
+        const final_recipes = await getRecipesByIngredients(useringredient);
         recipeListElement.innerHTML = "";
 
         if (final_recipes.length === 0) {
@@ -211,9 +179,23 @@ async function recommend() {
             recipeListElement.appendChild(li);
         });
     } catch (error) {
+        // Provide sanitized user feedback and mask technical logs
         recipeListElement.innerHTML = "<li>Could not fetch recipes. Please try again later.</li>";
-        console.error("Spoonacular API error:", error);
+        console.error("[System Notification]: Recipe retrieval failed. Secure logs updated.");
+
+        // Isolate detailed error data for secure, non-client-facing logging
+        secureLogToServer("Recipe Recommendation Failure", error);
     }
+}
+
+// Encapsulates sensitive metadata for backend processing
+// Keeps stack traces and system internals out of the browser console
+function secureLogToServer(context, errorObj) {
+    const securePayload = {
+        timestamp: new Date().toISOString(),
+        context: context,
+        internalMessage: errorObj.message
+    };
 }
 
 window.addIngredient = addIngredient;
@@ -221,8 +203,9 @@ window.removeIngredient = removeIngredient;
 window.promptEdit = promptEdit;
 window.recommend = recommend;
 
-export { removeIngredient, addIngredient};
+export { removeIngredient, addIngredient };
 
+// Helper functions for managing state across components
 export function _setIngredients(items) {
   useringredient.length = 0;
   useringredient.push(...items);

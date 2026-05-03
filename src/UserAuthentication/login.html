@@ -1,0 +1,107 @@
+<!--  the login page -->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login</title>
+        <script type="importmap">
+        {
+          "imports": {
+            "firebase/app": "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js",
+            "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js",
+            "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js"
+          }
+        }
+        </script>
+        <style>
+          body { font-family: sans-serif; background: #f9f9f9; }
+          .page-container { max-width: 420px; margin: 3rem auto; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+          h2 { text-align: center; font-size: 2rem; margin-bottom: 1.5rem; color: #2e8b57; }
+          label { display: block; margin-top: 1rem; font-weight: 600; color: #333; }
+          input { width: 100%; padding: 10px; margin-top: 6px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+          .btn-row { display: flex; gap: 10px; margin-top: 1.5rem; }
+          button { flex: 1; padding: 10px 16px; background: #2e8b57; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+          button:hover { background: #256f46; }
+          button.secondary { background: #6c757d; }
+          button.secondary:hover { background: #5a6268; }
+        </style>
+    </head>
+<body>
+
+<!-- setup for emailjs -->
+<script type="text/javascript"
+        src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+</script>
+<script type="text/javascript">
+   (function(){
+      emailjs.init({
+        publicKey: "gb6hDIVxCvwZCuhIv",
+      });
+   })();
+</script>
+
+<div class="page-container">
+  <h2>Login</h2>
+
+  <label>Email</label>
+  <input id="email" type="email" placeholder="you@example.com">
+
+  <label>Password</label>
+  <input id="password" type="password" placeholder="Password">
+
+  <div class="btn-row">
+    <button id="loginBtn">Login</button>
+    <button class="secondary" onclick="location.href='../index.html'">Return</button>
+  </div>
+
+  <!-- MFA input section -->
+  <div id="mfaSection" style="display:none; margin-top:1.5rem;">
+    <label>Verification Code</label>
+    <input id="mfaCode" type="text" placeholder="Enter 6-digit code">
+    <div class="btn-row" style="margin-top:1rem;">
+      <button id="verifyMfaBtn">Verify</button>
+    </div>
+  </div>
+</div>
+
+  <script type="module">
+    import { login, sendMFACode, verifyMFACode } from "./auth.js";
+
+    let pendingUid = null;
+
+    // grabs the email and password inputted by the user
+    document.getElementById("loginBtn").onclick = async () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+      // Step 1: Normal login
+      const userCred = await login(email, password);
+      pendingUid = userCred.user.uid;
+
+      // Step 2: Send MFA code
+      await sendMFACode(pendingUid);
+
+      // Step 3: Show MFA input
+      document.getElementById("mfaSection").style.display = "block";
+      document.getElementById("loginBtn").style.display = "none";
+      alert("Code sent to your email! :)");
+      } catch (err) {
+      alert(err.message);
+      }
+    };
+
+  // checks inputted 6 digit code; logs in with user's database if correct
+  document.getElementById("verifyMfaBtn").onclick = async () => {
+    const code = document.getElementById("mfaCode").value;
+    try {
+      await verifyMFACode(pendingUid, code);
+      window.location.href = "../dashboard.html";
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+  </script>
+
+</body>
+</html>
