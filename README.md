@@ -1,5 +1,5 @@
 # LetMeCook
-meal prep app that tracks calory goals and recomends recipes to help you reach those goals
+Meal prep app that tracks calorie goals and recommends recipes to help you reach those goals! :)
 
 ## Description
 LetMeCook is a smart meal-planning app that tracks calories, logs meals, and recommends recipes tailored to both your tastes and goals. It is ideal for anyone looking to lose weight, gain muscle, or save time in the kitchen by simplifying meal prep and everyday food tracking.
@@ -14,7 +14,13 @@ LetMeCook is a smart meal-planning app that tracks calories, logs meals, and rec
 - More in-depth information about features included in the Instruction Manual below!
 
 ## Visuals
-In progress
+<img src="https://github.com/mess0049/CS3203_GroupA_LetMeCook/blob/main/readme-visuals/dashboard.png" width="400">
+<img src="https://github.com/mess0049/CS3203_GroupA_LetMeCook/blob/main/readme-visuals/fridge.png" width="400">
+<img src="https://github.com/mess0049/CS3203_GroupA_LetMeCook/blob/main/readme-visuals/calorietracker.png" width="400">
+<img src="https://github.com/mess0049/CS3203_GroupA_LetMeCook/blob/main/readme-visuals/mealtracker.png" width="400">
+<img src="https://github.com/mess0049/CS3203_GroupA_LetMeCook/blob/main/readme-visuals/aisuggestions.png" width="400">
+<img src="https://github.com/mess0049/CS3203_GroupA_LetMeCook/blob/main/readme-visuals/aihelper.png" width="400">
+<img src="https://github.com/mess0049/CS3203_GroupA_LetMeCook/blob/main/readme-visuals/preferencetracker.png" width="400">
 
 ## Installation
 No software yet, but you can access it at https://letmecooksofteng.web.app/!
@@ -67,7 +73,7 @@ Currently not accepting contributions.
 - Seonghyun Park
 
 ## License
-To be implemented later
+This app is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Project Status
 Currently in active development with many features planned for upcoming releases.

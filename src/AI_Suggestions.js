@@ -1,7 +1,8 @@
 const SUPABASE_URL = "https://tiqkdnpjiytfquzbbybr.supabase.co";
-const SUPABASE_ANON_KEY = "YOUR_KEY_HERE"; // (keep your key as-is in your real file)
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpcWtkbnBqaXl0ZnF1emJieWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MDA2NTUsImV4cCI6MjA5MDQ3NjY1NX0.EErkriXnyvVdbio7sgdprOFYkvs9iq4-pRPH30wUACU";
 const CHAT_URL = `${SUPABASE_URL}/functions/v1/ai-food-suggestions`;
 
+// ---------------- ELEMENTS ----------------
 const form = document.getElementById("suggestion-form");
 const submitBtn = document.getElementById("submit-btn");
 const btnContent = document.getElementById("btn-content");
@@ -9,6 +10,7 @@ const resultsCard = document.getElementById("results-card");
 const suggestionsEl = document.getElementById("suggestions");
 const toastEl = document.getElementById("toast");
 const returnBtn = document.getElementById("return-btn");
+
 
 function showToast(message) {
   toastEl.textContent = message;
@@ -31,6 +33,7 @@ if (returnBtn) {
   });
 }
 
+// ---------------- SAFE MARKDOWN RENDER ----------------
 function renderMarkdown(text) {
   let html = text
     .replace(/&/g, "&amp;")
@@ -56,7 +59,7 @@ function renderMarkdown(text) {
   return html.replace(/\n/g, "<br />");
 }
 
-//  VALIDATION (CWE-20 FIX)
+// ---------------- VALIDATION (CWE-20 FIX) ----------------
 const SAFE_TEXT = /^[\p{L}\p{N}\s,.\-'/&()]*$/u;
 
 function normalizeText(text) {
@@ -64,7 +67,6 @@ function normalizeText(text) {
 }
 
 function validateInputs({ calorieGoal, currentCalories, allergies, dietaryNeeds }) {
-  // 1. Required + type
   if (!calorieGoal) return "Calorie goal is required";
 
   const goal = Number(calorieGoal);
@@ -77,7 +79,6 @@ function validateInputs({ calorieGoal, currentCalories, allergies, dietaryNeeds 
     return "Calories eaten must be a whole number";
   }
 
-  // 2. Range validation
   if (goal < 1000 || goal > 5000) {
     return "Calorie goal must be between 1000 and 5000";
   }
@@ -86,15 +87,12 @@ function validateInputs({ calorieGoal, currentCalories, allergies, dietaryNeeds 
     return "Calories eaten must be between 0 and your goal";
   }
 
-  // 3. Normalize text
   const normAllergies = normalizeText(allergies || "");
   const normDiet = normalizeText(dietaryNeeds || "");
 
-  // 4. Length validation
   if (normAllergies.length > 100) return "Allergies input too long";
   if (normDiet.length > 100) return "Dietary needs input too long";
 
-  // 5. Character validation
   if (normAllergies && !SAFE_TEXT.test(normAllergies)) {
     return "Allergies contains invalid characters";
   }
@@ -103,26 +101,23 @@ function validateInputs({ calorieGoal, currentCalories, allergies, dietaryNeeds 
     return "Dietary needs contains invalid characters";
   }
 
-  // 6. Domain rules
   const allowedDiets = ["vegan", "vegetarian", "keto", "none"];
 
   let finalDiet = "none";
   if (normDiet) {
-    const match = allowedDiets.find(d => normDiet.includes(d));
+    const match = allowedDiets.find((d) => normDiet.includes(d));
     if (!match) return "Unsupported dietary preference";
     finalDiet = match;
   }
 
-  // 7. Return safe structured data
   return {
     calorieGoal: goal,
     currentCalories: current,
     allergies: normAllergies,
-    dietaryNeeds: finalDiet
+    dietaryNeeds: finalDiet,
   };
 }
 
-// ---------------- FORM SUBMIT ----------------
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -135,7 +130,7 @@ form.addEventListener("submit", async (e) => {
     calorieGoal,
     currentCalories,
     allergies,
-    dietaryNeeds
+    dietaryNeeds,
   });
 
   if (typeof validationResult === "string") {
@@ -152,9 +147,10 @@ form.addEventListener("submit", async (e) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        Authorization: `Bearer ${ANON_KEY}`,
+        apikey: ANON_KEY,
       },
-      body: JSON.stringify(validationResult)
+      body: JSON.stringify(validationResult),
     });
 
     if (!resp.ok) {
@@ -203,7 +199,6 @@ form.addEventListener("submit", async (e) => {
         }
       }
     }
-
   } catch (err) {
     console.error(err);
     showToast("Failed to get suggestions. Please try again.");
