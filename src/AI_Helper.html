@@ -1,9 +1,17 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LetMeCook AI_Helper</title>
+    <title>LetMeCook AI Helper</title>
+    <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js"
+      }
+    }
+    </script>
 </head>
 <body>
     <div style="width: 400px; border: 1px solid #ccc; padding: 10px; font-family: sans-serif;">
@@ -16,77 +24,13 @@
                 <option value="Japanese">日本語</option>
             </select>
         </div>
-        
         <div id="chat-history" style="height: 300px; overflow-y: auto; border: 1px solid #eee; margin-bottom: 10px; padding: 10px;"></div>
-        
         <div style="display: flex;">
-            <input type="text" id="user-input" placeholder="Type your questions or meal goals..." style="flex: 1; padding: 8px;">
+            <input type="text" id="user-input" placeholder="Type your questions..." style="flex: 1; padding: 8px;">
             <button id="send-btn" style="padding: 8px 15px; background: #2e8b57; color: white; border: none; cursor: pointer;">Send</button>
         </div>
     </div>
-    <script>
-        // 발급받은 실제 API 키로 교체해야 작동합니다.
-        const API_KEY = "AIzaSyBE34GVg8-1NvgTgcGKFOEPbeGjZ8DU1bQ"; 
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
-        async function sendMessage() {
-            const inputField = document.getElementById("user-input");
-            const chatHistory = document.getElementById("chat-history");
-            const userMessage = inputField.value.trim();
 
-            if (!userMessage) return;
-
-            // 1. 사용자 입력 화면 표시
-            chatHistory.innerHTML += `<div style="margin-bottom: 10px; text-align: right;">
-                <span style="background: #e0f7fa; padding: 5px 10px; border-radius: 10px; display: inline-block; text-align: left;">${userMessage}</span>
-            </div>`;
-            
-            inputField.value = "";
-            chatHistory.scrollTop = chatHistory.scrollHeight;
-
-            // 2. 프롬프트 구성
-            const systemInstruction = "you are a helpful assistant for the LetMeCook app. Please provide a short and accurate recipe or meal recommendation for the following question: ";
-            const requestBody = {
-                contents: [{
-                    parts: [{ text: systemInstruction + userMessage }]
-                }]
-            };
-
-            // 3. API 요청
-            try {
-                const response = await fetch(API_URL, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(requestBody)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                const botReply = data.candidates[0].content.parts[0].text;
-
-                // 4. AI 응답 화면 표시
-                chatHistory.innerHTML += `<div style="margin-bottom: 10px; text-align: left;">
-                    <span style="background: #f1f1f1; padding: 5px 10px; border-radius: 10px; display: inline-block;">${botReply}</span>
-                </div>`;
-                
-            } catch (error) {
-                chatHistory.innerHTML += `<div style="color: red; margin-bottom: 10px;">API Error: ${error.message} (check API key is correct)</div>`;
-            }
-            
-            chatHistory.scrollTop = chatHistory.scrollHeight;
-        }
-
-        // Enter 키를 눌러도 전송되도록 이벤트 리스너 추가
-        document.getElementById("user-input").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                sendMessage();
-            }
-        });
-    </script>
+    <script type="module" src="AI_Helper.js"></script>
 </body>
 </html>

@@ -1,37 +1,40 @@
-import { _getIngredients } from './pantryTracker.js';
+import { _getIngredients } from './SpoonacularAPI/Pantry_Tracker.js';
 
 const API_KEY = "AIzaSyBE34GVg8-1NvgTgcGKFOEPbeGjZ8DU1bQ"; 
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
-/**
- * [Reading Complexity]
- * Use patently clear names and escape logic (CWE-79).
- * Focus on 'why' rather than 'what' for security comments.
- */
+
+// Monitoring system for Reliability requirements
+const apiMonitor = {
+    totalCalls: 0,
+    successCount: 0,
+    errorCount: 0,
+    lastResponseTime: 0,
+
+    logCall(startTime, isSuccess) {
+        this.totalCalls++;
+        isSuccess ? this.successCount++ : this.errorCount++;
+        this.lastResponseTime = performance.now() - startTime;
+        console.log(`[Monitor] Total: ${this.totalCalls}, Success: ${this.successCount}, Error: ${this.errorCount}, Latency: ${this.lastResponseTime.toFixed(2)}ms`);
+    }
+};
+
+// Sanitize input for Security (CWE-79)
 function sanitizeInput(str) {
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
               .replace(/"/g, "&quot;").replace(/'/g, "&#x27;").replace(/\//g, "&#x2F;");
 }
 
-/**
- * [Structural/Data Complexity]
- * Separated subtask: Constructs the structured request payload.
- * Uses a 'config' pattern to keep data structure simple and predictable.
- */
+// Build structured request (Data Complexity)
 function createPromptRequest(userMsg, pantryItems, targetLang) {
     const ingredients = pantryItems.length > 0 ? pantryItems.map(i => i.name).join(", ") : "None";
-    const instruction = `You are a LetMeCook assistant. User Pantry: [${ingredients}]. Target Language: ${targetLang}. 
-                         Provide helpful advice in ${targetLang} only.`;
+    const instruction = `You are a LetMeCook assistant. User Pantry: [${ingredients}]. Target Language: ${targetLang}. Provide advice in ${targetLang} only.`;
     
     return {
         contents: [{ parts: [{ text: `${instruction}\n\nUser: ${userMsg}` }] }]
     };
 }
 
-/**
- * [Decision Complexity]
- * Isolates the fetch logic and handles timeout/errors as discrete decision points.
- * Uses early returns to avoid deep nesting.
- */
+// Handle API call with 10s timeout (Reliability)
 async function fetchAIResponse(requestBody) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -46,23 +49,20 @@ async function fetchAIResponse(requestBody) {
         clearTimeout(timeoutId);
         return response;
     } catch (error) {
-        throw error; // Let the caller handle the specific UI error message
+        throw error;
     }
 }
 
-/**
- * [Structural Complexity] 
- * Main handler kept under 30 lines by delegating subtasks to helpers.
- */
+// Main chat handler (Structural Complexity < 30 lines)
 async function handleUserChatSubmission() {
     const inputField = document.getElementById("user-input");
     const chatHistory = document.getElementById("chat-history");
     const userMsg = inputField.value.trim();
-
-    if (!userMsg) return; // Guard clause for reading complexity
+    if (!userMsg) return;
 
     updateChatUI(chatHistory, sanitizeInput(userMsg), 'right');
     inputField.value = "";
+    const startTime = performance.now(); // start timer
 
     try {
         const pantry = _getIngredients();
@@ -74,13 +74,16 @@ async function handleUserChatSubmission() {
 
         const data = await response.json();
         const botReply = data.candidates[0].content.parts[0].text;
+        
         updateChatUI(chatHistory, sanitizeInput(botReply), 'left');
+        apiMonitor.logCall(startTime, true); // log success
     } catch (err) {
+        apiMonitor.logCall(startTime, false); // log failure
         displayErrorMessage(chatHistory, err);
     }
 }
 
-// Helper to keep UI updates consistent
+// UI Helpers
 function updateChatUI(container, text, alignment) {
     const bgColor = alignment === 'right' ? '#e0f7fa' : '#f1f1f1';
     container.innerHTML += `<div style="margin-bottom: 10px; text-align: ${alignment};">
@@ -89,12 +92,13 @@ function updateChatUI(container, text, alignment) {
     container.scrollTop = container.scrollHeight;
 }
 
-// Separate error handling for decision complexity reduction
 function displayErrorMessage(container, error) {
-    const msg = error.name === 'AbortError' 
-        ? "Timeout: Server is busy." 
-        : `System Alert: Unavailable (${error.message}).`;
-    container.innerHTML += `<div style="color: red; margin-bottom: 10px;">🚨 ${msg}</div>`;
+    const msg = error.name === 'AbortError' ? "Timeout: Server busy." : `Error: ${error.message}`;
+    container.innerHTML += `<div style="color: red; margin-bottom: 10px;">🚨 System Alert: ${msg}</div>`;
 }
 
+// Event Listeners
 document.getElementById("send-btn").addEventListener("click", handleUserChatSubmission);
+document.getElementById("user-input").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") handleUserChatSubmission();
+});
