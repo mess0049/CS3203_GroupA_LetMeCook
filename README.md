@@ -67,7 +67,7 @@ Currently not accepting contributions.
 - Seonghyun Park
 
 ## License
-To be implemented later
+This app is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Project Status
 Currently in active development with many features planned for upcoming releases.
