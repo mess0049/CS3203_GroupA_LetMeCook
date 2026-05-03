@@ -8,12 +8,13 @@ LetMeCook is a smart meal-planning app that tracks calories, logs meals, and rec
 - Log in and sign up with an email and password!
 - Keep track of your calories with a calorie tracker!
 - Keep a list of the ingredients in your pantry and get recipes recommended based on what you have on hand!
-
-## Badges
-To be implemented later
+- Search for recipes, and save them!
+- Ask the AI Helper questions!
+- Change your meal preferences!
+- More in-depth information about features included in the Instruction Manual below!
 
 ## Visuals
-To be implemented later
+In progress
 
 ## Installation
 No software yet, but you can access it at https://letmecooksofteng.web.app/!
