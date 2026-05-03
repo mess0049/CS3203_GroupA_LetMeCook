@@ -1,6 +1,17 @@
 import { _getIngredients } from './SpoonacularAPI/Pantry_Tracker.js';
 
-const API_KEY = "AIzaSyBE34GVg8-1NvgTgcGKFOEPbeGjZ8DU1bQ"; 
+async function getApiKey() {
+    try {
+        const response = await fetch('./api_keys.json');
+        const data = await response.json();
+        return data.GEMINI_API_KEY;
+    } catch (err) {
+        console.error("API 키를 로드할 수 없습니다.");
+        return null;
+    }
+}
+
+const API_KEY = await getApiKey();
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
 
 // Monitoring system for Reliability requirements
