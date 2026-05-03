@@ -30,20 +30,15 @@
   <div class="container">
     <h1>Add to Log</h1>
     
-    <div id="search-section">
-      <label for="foodSearchInput">Search Food Database:</label>
-      <input type="text" id="foodSearchInput" placeholder="Search (e.g., Avocado Toast)">
-      <button onclick="searchFood()">Search API</button>
-    </div>
+   <div id="search-section">
+  <label for="foodSearchInput">Search Food Database:</label>
+  <input type="text" id="foodSearchInput" placeholder="Search (e.g., Avocado Toast)">
+  <button onclick="searchFood()">Search API</button>
+  <div id="searchResults" style="display:none;">
+    <ul id="resultsList"></ul>
+  </div>
+</div>
 
-  <!-- Dropdown for food selection -->
-  <label for="foodSelect">Choose food:</label>
-  <select id="foodSelect">
-    <option value="Apple!" data-cal="95">Apple (95 cal)</option>
-    <option value="Banana" data-cal="105">Banana (105 cal)</option>
-    <option value="Chicken Sandwich" data-cal="420">Chicken Sandwich (420 cal)</option>
-    <option value="Yogurt" data-cal="150">Yogurt (150 cal)</option>
-  </select>
 
     <div id="summary">
       <h3>Your Daily Log</h3>
