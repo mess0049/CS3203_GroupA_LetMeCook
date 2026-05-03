@@ -1,14 +1,16 @@
-
 const SUPABASE_URL = "https://tiqkdnpjiytfquzbbybr.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpcWtkbnBqaXl0ZnF1emJieWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MDA2NTUsImV4cCI6MjA5MDQ3NjY1NX0.EErkriXnyvVdbio7sgdprOFYkvs9iq4-pRPH30wUACU";
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpcWtkbnBqaXl0ZnF1emJieWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MDA2NTUsImV4cCI6MjA5MDQ3NjY1NX0.EErkriXnyvVdbio7sgdprOFYkvs9iq4-pRPH30wUACU";
 const CHAT_URL = `${SUPABASE_URL}/functions/v1/ai-food-suggestions`;
 
+// ---------------- ELEMENTS ----------------
 const form = document.getElementById("suggestion-form");
 const submitBtn = document.getElementById("submit-btn");
 const btnContent = document.getElementById("btn-content");
 const resultsCard = document.getElementById("results-card");
 const suggestionsEl = document.getElementById("suggestions");
 const toastEl = document.getElementById("toast");
+const returnBtn = document.getElementById("return-btn");
+
 
 function showToast(message) {
   toastEl.textContent = message;
@@ -18,12 +20,20 @@ function showToast(message) {
 
 function setLoading(loading) {
   submitBtn.disabled = loading;
+  if (returnBtn) returnBtn.disabled = loading;
+
   btnContent.innerHTML = loading
     ? '<span class="spinner"></span> Generating suggestions...'
     : "✨ Get AI Suggestions";
 }
 
-// Very small markdown -> HTML converter for the streamed response
+if (returnBtn) {
+  returnBtn.addEventListener("click", () => {
+    window.location.replace("dashboard.html");
+  });
+}
+
+// ---------------- SAFE MARKDOWN RENDER ----------------
 function renderMarkdown(text) {
   let html = text
     .replace(/&/g, "&amp;")
@@ -38,55 +48,74 @@ function renderMarkdown(text) {
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
     .replace(/`([^`]+)`/g, "<code>$1</code>");
 
-  // Lists
   html = html.replace(/(?:^|\n)([-*] .+(?:\n[-*] .+)*)/g, (match, list) => {
-    const items = list.split("\n").map((l) => `<li>${l.replace(/^[-*]\s+/, "")}</li>`).join("");
+    const items = list
+      .split("\n")
+      .map((l) => `<li>${l.replace(/^[-*]\s+/, "")}</li>`)
+      .join("");
     return `\n<ul>${items}</ul>`;
   });
 
   return html.replace(/\n/g, "<br />");
 }
 
-// ---------- CWE-20: Client-side input validation ----------
-// Mirror of server-side rules. Server still re-validates (defense in depth).
+// ---------------- VALIDATION (CWE-20 FIX) ----------------
 const SAFE_TEXT = /^[\p{L}\p{N}\s,.\-'/&()]*$/u;
 
+function normalizeText(text) {
+  return text.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
 function validateInputs({ calorieGoal, currentCalories, allergies, dietaryNeeds }) {
-  if (calorieGoal === "" || calorieGoal === null || calorieGoal === undefined) {
-    return "Please enter your calorie goal";
-  }
-  const cg = Number(calorieGoal);
-  if (!Number.isFinite(cg) || !Number.isInteger(cg)) {
+  if (!calorieGoal) return "Calorie goal is required";
+
+  const goal = Number(calorieGoal);
+  if (!Number.isFinite(goal) || !Number.isInteger(goal)) {
     return "Calorie goal must be a whole number";
   }
-  if (cg < 500 || cg > 10000) {
-    return "Calorie goal must be between 500 and 10000";
+
+  const current = currentCalories === "" ? 0 : Number(currentCalories);
+  if (!Number.isFinite(current) || !Number.isInteger(current)) {
+    return "Calories eaten must be a whole number";
   }
 
-  if (currentCalories !== "" && currentCalories !== null && currentCalories !== undefined) {
-    const cc = Number(currentCalories);
-    if (!Number.isFinite(cc) || !Number.isInteger(cc)) {
-      return "Calories eaten must be a whole number";
-    }
-    if (cc < 0 || cc > 20000) {
-      return "Calories eaten must be between 0 and 20000";
-    }
+  if (goal < 1000 || goal > 5000) {
+    return "Calorie goal must be between 1000 and 5000";
   }
 
-  if (typeof allergies !== "string" || allergies.length > 500) {
-    return "Allergies must be 500 characters or fewer";
+  if (current < 0 || current > goal) {
+    return "Calories eaten must be between 0 and your goal";
   }
-  if (allergies && !SAFE_TEXT.test(allergies)) {
+
+  const normAllergies = normalizeText(allergies || "");
+  const normDiet = normalizeText(dietaryNeeds || "");
+
+  if (normAllergies.length > 100) return "Allergies input too long";
+  if (normDiet.length > 100) return "Dietary needs input too long";
+
+  if (normAllergies && !SAFE_TEXT.test(normAllergies)) {
     return "Allergies contains invalid characters";
   }
-  if (typeof dietaryNeeds !== "string" || dietaryNeeds.length > 500) {
-    return "Dietary needs must be 500 characters or fewer";
-  }
-  if (dietaryNeeds && !SAFE_TEXT.test(dietaryNeeds)) {
+
+  if (normDiet && !SAFE_TEXT.test(normDiet)) {
     return "Dietary needs contains invalid characters";
   }
 
-  return null;
+  const allowedDiets = ["vegan", "vegetarian", "keto", "none"];
+
+  let finalDiet = "none";
+  if (normDiet) {
+    const match = allowedDiets.find((d) => normDiet.includes(d));
+    if (!match) return "Unsupported dietary preference";
+    finalDiet = match;
+  }
+
+  return {
+    calorieGoal: goal,
+    currentCalories: current,
+    allergies: normAllergies,
+    dietaryNeeds: finalDiet,
+  };
 }
 
 form.addEventListener("submit", async (e) => {
@@ -97,9 +126,15 @@ form.addEventListener("submit", async (e) => {
   const allergies = document.getElementById("allergies").value.trim();
   const dietaryNeeds = document.getElementById("dietaryNeeds").value.trim();
 
-  const validationError = validateInputs({ calorieGoal, currentCalories, allergies, dietaryNeeds });
-  if (validationError) {
-    showToast(validationError);
+  const validationResult = validateInputs({
+    calorieGoal,
+    currentCalories,
+    allergies,
+    dietaryNeeds,
+  });
+
+  if (typeof validationResult === "string") {
+    showToast(validationResult);
     return;
   }
 
@@ -112,21 +147,15 @@ form.addEventListener("submit", async (e) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        Authorization: `Bearer ${ANON_KEY}`,
+        apikey: ANON_KEY,
       },
-      body: JSON.stringify({
-        calorieGoal: Number(calorieGoal),
-        currentCalories: currentCalories === "" ? 0 : Number(currentCalories),
-        allergies,
-        dietaryNeeds,
-      }),
+      body: JSON.stringify(validationResult),
     });
 
     if (!resp.ok) {
       const err = await resp.json().catch(() => ({}));
-      const detail = Array.isArray(err.details) ? `: ${err.details.join(", ")}` : "";
-      showToast((err.error || "Something went wrong") + detail);
-      setLoading(false);
+      showToast(err.error || "Something went wrong");
       return;
     }
 
@@ -142,19 +171,24 @@ form.addEventListener("submit", async (e) => {
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
+
       buffer += decoder.decode(value, { stream: true });
 
-      let newlineIndex;
-      while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
-        let line = buffer.slice(0, newlineIndex);
-        buffer = buffer.slice(newlineIndex + 1);
+      let idx;
+      while ((idx = buffer.indexOf("\n")) !== -1) {
+        let line = buffer.slice(0, idx);
+        buffer = buffer.slice(idx + 1);
+
         if (line.endsWith("\r")) line = line.slice(0, -1);
         if (!line.startsWith("data: ")) continue;
-        const jsonStr = line.slice(6).trim();
-        if (jsonStr === "[DONE]") break;
+
+        const json = line.slice(6).trim();
+        if (json === "[DONE]") break;
+
         try {
-          const parsed = JSON.parse(jsonStr);
+          const parsed = JSON.parse(json);
           const content = parsed.choices?.[0]?.delta?.content;
+
           if (content) {
             fullText += content;
             suggestionsEl.innerHTML = renderMarkdown(fullText);
