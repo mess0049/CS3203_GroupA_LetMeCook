@@ -18,9 +18,9 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Performance Monitoring and get a reference to the service
-const perf = getPerformance(app);
-
 // Export services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+// Initialize Performance Monitoring and get a reference to the service
+const perf = getPerformance(app);
