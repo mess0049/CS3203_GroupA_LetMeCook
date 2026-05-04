@@ -23,7 +23,6 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - name: Create api_keys.json
       run: echo '{"GEMINI_API_KEY":"${{ secrets.SECRET_API_KEY }}"}' > src/api_keys.json
-
     - name: Build
       run: |
         npm install
