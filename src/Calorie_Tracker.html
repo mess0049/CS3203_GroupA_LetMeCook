@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Let Me Cook | Add Recipe & Calories</title>
+
+  <!-- 
+    IMPORTMAP: This tells the browser where to find the Firebase libraries. 
+    It allows us to use 'firebase/app' in our JS instead of long URLs. 
+  -->
   <script type="importmap">
   {
     "imports": {
@@ -13,15 +18,27 @@
     }
   }
   </script>
+
   <style>
+    /* Basic layout and typography */
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 30px; background-color: #f4f7f6; }
+    
+    /* Center the app card on the screen */
     .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    
+    /* Form styling for inputs and primary buttons */
     input, button { padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; border-radius: 6px; border: 1px solid #ddd; }
     button { background-color: #2ecc71; color: white; border: none; cursor: pointer; font-weight: bold; }
     button:hover { background-color: #27ae60; }
+    
+    /* Search Results: Hidden by default until the API returns data */
     #searchResults { background: #fff9e6; border: 1px solid #f1c40f; padding: 10px; border-radius: 6px; margin-top: 15px; }
+    
+    /* Align search result text and 'Add' buttons horizontally */
     #resultsList li { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #eee; }
     #resultsList button { width: auto; padding: 5px 10px; font-size: 0.8em; }
+    
+    /* Summary section styling */
     #summary { margin-top: 20px; border-top: 2px solid #eee; padding-top: 15px; }
     .secondary-btn { background-color: #34495e; margin-top: 10px; }
   </style>
@@ -31,31 +48,41 @@
   <div class="container">
     <h1>Add to Log</h1>
     
-   <div id="search-section">
-  <label for="foodSearchInput">Search Food Database:</label>
-  <input type="text" id="foodSearchInput" placeholder="Search (e.g., Avocado Toast)">
-  <button onclick="searchFood()">Search API</button>
-  <div id="searchResults" style="display:none;">
-    <ul id="resultsList"></ul>
-  </div>
-</div>
+    <!-- SEARCH SECTION: Interfaces with the Spoonacular API via Calorie_Tracker.js -->
+    <div id="search-section">
+      <label for="foodSearchInput">Search Food Database:</label>
+      <input type="text" id="foodSearchInput" placeholder="Search (e.g., Avocado Toast)">
+      <button onclick="searchFood()">Search API</button>
+      
+      <!-- This div is populated dynamically by the displaySearchResults() function -->
+      <div id="searchResults" style="display:none;">
+        <ul id="resultsList"></ul>
+      </div>
+    </div>
 
-
+    <!-- DAILY LOG: This section is updated by the updateSummary() function in JS -->
     <div id="summary">
       <h3>Your Daily Log</h3>
+      <!-- Placeholder text shown while observeAuth() checks Firebase status -->
       <p>Loading your data from Firebase...</p>
     </div>
 
+    <!-- REMOVAL SECTION: Allows users to delete an entry by typing the name -->
     <div style="margin-top: 30px;">
       <input id="removeName" type="text" placeholder="Type name to remove">
       <button class="secondary-btn" style="background-color: #e74c3c;" onclick="removeFood()">Remove Entry</button>
     </div>
 
+    <!-- NAVIGATION: Link back to the main user dashboard -->
     <div style="margin-top: 20px;">
       <button class="secondary-btn" onclick="location.href='dashboard.html'">Return to Dashboard</button>
     </div>
   </div>
 
+  <!-- 
+    MAIN SCRIPT: Loaded as a module to support 'import' statements.
+    Contains the logic for API calls, Firebase syncing, and UI updates.
+  -->
   <script type="module" src="Calorie_Tracker.js"></script>
 </body>
 </html>
