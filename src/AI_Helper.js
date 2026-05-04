@@ -1,86 +1,92 @@
-import { _getIngredients } from './pantryTracker.js';
+import { _getIngredients } from './SpoonacularAPI/Pantry_Tracker.js';
 
-const API_KEY = "AIzaSyBE34GVg8-1NvgTgcGKFOEPbeGjZ8DU1bQ"; 
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
-/**
- * [Reading Complexity]
- * Use patently clear names and escape logic (CWE-79).
- * Focus on 'why' rather than 'what' for security comments.
- */
+// Sanitize input to prevent XSS
 function sanitizeInput(str) {
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
               .replace(/"/g, "&quot;").replace(/'/g, "&#x27;").replace(/\//g, "&#x2F;");
 }
 
-/**
- * [Structural/Data Complexity]
- * Separated subtask: Constructs the structured request payload.
- * Uses a 'config' pattern to keep data structure simple and predictable.
- */
+// Build prompt for AI
 function createPromptRequest(userMsg, pantryItems, targetLang) {
-    const ingredients = pantryItems.length > 0 ? pantryItems.map(i => i.name).join(", ") : "None";
-    const instruction = `You are a LetMeCook assistant. User Pantry: [${ingredients}]. Target Language: ${targetLang}. 
-                         Provide helpful advice in ${targetLang} only.`;
+    const items = pantryItems.length > 0 ? pantryItems.map(i => i.name).join(", ") : "None";
+    
+    const systemPrompt = 
+`You are a professional culinary assistant for the 'LetMeCook' app. 
+Strictly follow these rules:
+1. Language: Answer strictly in ${targetLang}.
+2. Context: The user's current pantry contains: [${items}].
+3. Accuracy: Recommend recipes prioritizing the provided pantry items. If extra ingredients are needed, clearly list them.
+4. Tone: Be concise, objective, and provide step-by-step instructions. Do not provide dangerous or inedible recipes.
+5. Limitation: If the user asks non-cooking related questions, politely decline and redirect to culinary topics.`;
     
     return {
-        contents: [{ parts: [{ text: `${instruction}\n\nUser: ${userMsg}` }] }]
+        contents: [{ parts: [{ text: `${systemPrompt}\n\nUser: ${userMsg}` }] }]
     };
 }
 
-/**
- * [Decision Complexity]
- * Isolates the fetch logic and handles timeout/errors as discrete decision points.
- * Uses early returns to avoid deep nesting.
- */
-async function fetchAIResponse(requestBody) {
+// Fetch response from Gemini API
+async function fetchAIResponse(userMsg, pantry, lang) {
+    // Load API key
+    const responseKey = await fetch('./api_keys.json');
+    if (!responseKey.ok) {
+        throw new Error("API Key file missing in deployment.");
+    }
+    
+    const keyData = await responseKey.json();
+    const API_KEY = keyData.GEMINI_API_KEY;
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const body = createPromptRequest(userMsg, pantry, lang);
 
     try {
         const response = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(requestBody),
+            body: JSON.stringify(body),
             signal: controller.signal
         });
         clearTimeout(timeoutId);
         return response;
     } catch (error) {
-        throw error; // Let the caller handle the specific UI error message
+        throw error;
     }
 }
 
-/**
- * [Structural Complexity] 
- * Main handler kept under 30 lines by delegating subtasks to helpers.
- */
+// Main chat function
 async function handleUserChatSubmission() {
     const inputField = document.getElementById("user-input");
     const chatHistory = document.getElementById("chat-history");
     const userMsg = inputField.value.trim();
 
-    if (!userMsg) return; // Guard clause for reading complexity
+    if (!userMsg) return;
 
+    // Show user message
     updateChatUI(chatHistory, sanitizeInput(userMsg), 'right');
     inputField.value = "";
 
     try {
-        const pantry = _getIngredients();
-        const lang = document.getElementById("lang-select").value;
-        const body = createPromptRequest(userMsg, pantry, lang);
+        // Get pantry data safely
+        let pantry = [];
+        try { pantry = _getIngredients(); } catch (e) {}
         
-        const response = await fetchAIResponse(body);
-        if (!response.ok) throw new Error(response.status);
+        const lang = document.getElementById("lang-select").value;
+        const response = await fetchAIResponse(userMsg, pantry, lang);
+        
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
 
         const data = await response.json();
         const botReply = data.candidates[0].content.parts[0].text;
+        
+        // Show AI response
         updateChatUI(chatHistory, sanitizeInput(botReply), 'left');
     } catch (err) {
         displayErrorMessage(chatHistory, err);
     }
 }
 
-// Helper to keep UI updates consistent
+// Update UI with chat bubbles
 function updateChatUI(container, text, alignment) {
     const bgColor = alignment === 'right' ? '#e0f7fa' : '#f1f1f1';
     container.innerHTML += `<div style="margin-bottom: 10px; text-align: ${alignment};">
@@ -89,12 +95,14 @@ function updateChatUI(container, text, alignment) {
     container.scrollTop = container.scrollHeight;
 }
 
-// Separate error handling for decision complexity reduction
+// Show error in UI
 function displayErrorMessage(container, error) {
-    const msg = error.name === 'AbortError' 
-        ? "Timeout: Server is busy." 
-        : `System Alert: Unavailable (${error.message}).`;
-    container.innerHTML += `<div style="color: red; margin-bottom: 10px;">🚨 ${msg}</div>`;
+    const msg = error.name === 'AbortError' ? "Timeout" : `${error.message}`;
+    container.innerHTML += `<div style="color: red; margin-bottom: 10px;">🚨 Error: ${msg}</div>`;
 }
 
+// Event listeners for send button and enter key
 document.getElementById("send-btn").addEventListener("click", handleUserChatSubmission);
+document.getElementById("user-input").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") handleUserChatSubmission();
+});
