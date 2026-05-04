@@ -9,10 +9,18 @@ function sanitizeInput(str) {
 // Build prompt for AI
 function createPromptRequest(userMsg, pantryItems, targetLang) {
     const items = pantryItems.length > 0 ? pantryItems.map(i => i.name).join(", ") : "None";
-    const instruction = `LetMeCook Assistant. User Pantry: [${items}]. Target Language: ${targetLang}. Advice in ${targetLang} only.`;
+    
+    const systemPrompt = 
+`You are a professional culinary assistant for the 'LetMeCook' app. 
+Strictly follow these rules:
+1. Language: Answer strictly in ${targetLang}.
+2. Context: The user's current pantry contains: [${items}].
+3. Accuracy: Recommend recipes prioritizing the provided pantry items. If extra ingredients are needed, clearly list them.
+4. Tone: Be concise, objective, and provide step-by-step instructions. Do not provide dangerous or inedible recipes.
+5. Limitation: If the user asks non-cooking related questions, politely decline and redirect to culinary topics.`;
     
     return {
-        contents: [{ parts: [{ text: `${instruction}\n\nUser: ${userMsg}` }] }]
+        contents: [{ parts: [{ text: `${systemPrompt}\n\nUser: ${userMsg}` }] }]
     };
 }
 
@@ -27,7 +35,7 @@ async function fetchAIResponse(userMsg, pantry, lang) {
     const keyData = await responseKey.json();
     const API_KEY = keyData.GEMINI_API_KEY;
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
-    
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
     const body = createPromptRequest(userMsg, pantry, lang);
