@@ -29,7 +29,7 @@ function setLoading(loading) {
 
 if (returnBtn) {
   returnBtn.addEventListener("click", () => {
-    window.location.replace("dashboard.html");
+    window.location.replace("../dashboard.html");
   });
 }
 
