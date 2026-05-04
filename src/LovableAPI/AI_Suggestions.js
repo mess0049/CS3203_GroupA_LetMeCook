@@ -23,7 +23,7 @@ function setLoading(loading) {
   if (returnBtn) returnBtn.disabled = loading;
 
   btnContent.innerHTML = loading
-    ? '<span class="spinner"></span> Generating suggestions...'
+    ? '<span class="spinner"></span>Generating suggestions...'
     : "✨ Get AI Suggestions";
 }
 
