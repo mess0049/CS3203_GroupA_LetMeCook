@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LetMeCook AI Helper</title>
+    <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js",
+        "firebase/performance": "https://www.gstatic.com/firebasejs/10.8.1/firebase-performance.js"
+      }
+    }
+    </script>
+    <style>
+        /* 화면 중앙 배치를 위한 스타일 */
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            font-family: sans-serif;
+        }
+
+        #main-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* 버튼은 왼쪽 정렬 */
+        }
+
+        #chat-container {
+            width: 400px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* 대시보드 버튼 스타일 */
+        #back-btn {
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            background: none;
+            border: 1px solid #2e8b57;
+            color: #2e8b57;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        #back-btn:hover {
+            background: #2e8b57;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="main-wrapper">
+        <button id="back-btn" onclick="location.href='dashboard.html'">← Return to Dashboard</button>
+
+        <div id="chat-container">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin-top: 0; margin-bottom: 10px;">🍳 LetMeCook AI Helper</h3>
+                <select id="lang-select" style="padding: 4px;">
+                    <option value="English">English</option>
+                    <option value="Korean">한국어</option>
+                    <option value="Spanish">Español</option>
+                    <option value="Japanese">日本語</option>
+                </select>
+            </div>
+            
+            <div id="chat-history" style="height: 350px; overflow-y: auto; border: 1px solid #eee; margin-bottom: 10px; padding: 10px;"></div>
+            
+            <div style="display: flex;">
+                <input type="text" id="user-input" placeholder="Type your questions..." style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px 0 0 4px;">
+                <button id="send-btn" style="padding: 8px 15px; background: #2e8b57; color: white; border: none; cursor: pointer; border-radius: 0 4px 4px 0;">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="AI_Helper.js"></script>
+</body>
+</html>
