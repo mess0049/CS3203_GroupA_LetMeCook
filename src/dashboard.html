@@ -51,7 +51,7 @@
 
   <div class="account-row">
     <button id="changePasswordBtn" onclick="location.href='UserAuthentication/change-password.html'">Change Password</button>
-    <button id="logoutBtn" onclick = "location.href='index.html'">Logout</button>
+    <button id="logoutBtn">Logout</button>
   </div>
 </div>
 
@@ -66,7 +66,7 @@
         const expired = await checkPasswordExpiry(uid);
         if (expired) document.getElementById("expiryWarning").style.display = "block";
       } else {
-        window.location.href = "login.html";
+        window.location.href = "index.html";
       }
     });
 
