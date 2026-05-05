@@ -7,16 +7,10 @@
   <script type="importmap">
   {
     "imports": {
-<<<<<<< HEAD:src/__tests__/Meal data/Preference_Tracker.html
-      "firebase/app":      "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js",
-      "firebase/auth":     "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js",
-      "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js"
-=======
       "firebase/app":       "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js",
       "firebase/auth":      "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js",
       "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js",
       "firebase/performance": "https://www.gstatic.com/firebasejs/10.8.1/firebase-performance.js"
->>>>>>> origin/main:src/Preference_Tracker.html
     }
   }
   </script>
@@ -112,11 +106,11 @@
     <ul id="prefList"><li>Loading…</li></ul>
   </fieldset>
 
-  <button class="btn-back" onclick="location.href='../../dashboard.html'">← Back to Dashboard</button>
+  <button class="btn-back" onclick="location.href='../dashboard.html'">← Back to Dashboard</button>
 
   <script type="module">
     // Import functions from our secure logic module
-    import { observeAuth } from "./UserAuthentication/auth.js";
+    import { observeAuth } from "../UserAuthentication/auth.js";
     import {
       listPreferences,
       addPreference,
