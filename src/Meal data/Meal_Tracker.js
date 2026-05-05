@@ -4,14 +4,14 @@
  * and syncing data with Firebase Firestore.
  */
 
-import { db } from "../../firebase.js";
+import { db } from "../firebase.js";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { observeAuth } from "../../UserAuthentication/auth.js";
-import { register } from "../../user data/userdata.js";
-import { searchRecipes } from "../../SpoonacularAPI/SpoonacularAPI.js";
+import { observeAuth } from "../UserAuthentication/auth.js";
+import { register } from "../user data/userdata.js";
+import { searchRecipes } from "../SpoonacularAPI/SpoonacularAPI.js";
 import { getUserPreferences } from "./Preference_Tracker.js";
-import { calorieTracker } from "../../Calorie_Tracker.js";
-import { getRecipeNutrition } from "../../SpoonacularAPI/SpoonacularAPI.js";
+import { calorieTracker } from "../Calorie_Tracker.js";
+import { getRecipeNutrition } from "../SpoonacularAPI/SpoonacularAPI.js";
 
 // Local state for meals and user session
 let meals = [];

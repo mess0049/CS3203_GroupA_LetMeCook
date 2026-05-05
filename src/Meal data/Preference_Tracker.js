@@ -4,7 +4,7 @@
  * It includes security features like Rate Limiting and Type Validation.
  */
 
-import { db } from "../../firebase.js";
+import { db } from "../firebase.js";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
 // ── SECURITY CONSTANTS ────────────────────────────────────────────────────────
