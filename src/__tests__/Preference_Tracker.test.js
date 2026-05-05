@@ -7,7 +7,7 @@ import {
   _resetRateLimit,
   _getRateLimitStore,
   PREFERENCE_SCHEMA,
-} from "../Meal Data/Preference_Tracker.js";
+} from "../Meal_data/Preference_Tracker.js";
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
